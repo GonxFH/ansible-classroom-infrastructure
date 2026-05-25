@@ -1,0 +1,5 @@
+- import_tasks: install.yml
+  when: virtualbox_state == "present"
+
+- import_tasks: uninstall.yml
+  when: virtualbox_state == "absent"

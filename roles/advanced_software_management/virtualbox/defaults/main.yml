@@ -1,0 +1,8 @@
+virtualbox_package: virtualbox
+virtualbox_state: present
+
+virtualbox_temp_dir: /tmp/virtualbox
+
+virtualbox_extpack_file: "Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack"
+
+virtualbox_install_extpack: true

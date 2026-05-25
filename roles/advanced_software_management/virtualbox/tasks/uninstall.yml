@@ -1,0 +1,20 @@
+- name: Eliminar Extension Pack
+  apt:
+    name: virtualbox-ext-pack
+    state: absent
+    purge: true
+
+- name: Eliminar VirtualBox
+  apt:
+    name: "{{ virtualbox_package }}"
+    state: absent
+    purge: true
+
+- name: Eliminar dependencias no usadas
+  apt:
+    autoremove: yes
+  when: virtualbox_remove_dependencies | default(true)
+
+- name: Actualizar cache APT
+  apt:
+    update_cache: true

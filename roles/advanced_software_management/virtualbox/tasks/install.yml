@@ -1,0 +1,19 @@
+- name: Instalar VirtualBox
+  apt:
+    name: "{{ virtualbox_package }}"
+    state: present
+    update_cache: true
+
+
+- name: Preaceptar licencia VirtualBox Ext Pack
+  debconf:
+    name: virtualbox-ext-pack
+    question: virtualbox-ext-pack/license
+    value: "true"
+    vtype: boolean
+
+
+- name: Instalar Extension Pack desde repositorio
+  apt:
+    name: virtualbox-ext-pack
+    state: present
