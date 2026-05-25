@@ -1,0 +1,11 @@
+- import_tasks: install_theme.yml
+  tags: install
+
+- import_tasks: config_theme.yml
+  tags: config
+
+- import_tasks: change_theme_background.yml
+  tags: background
+
+- import_tasks: activate_theme.yml
+  tags: activate

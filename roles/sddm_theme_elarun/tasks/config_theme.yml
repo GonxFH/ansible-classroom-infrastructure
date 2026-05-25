@@ -1,0 +1,16 @@
+# --- DESACTIVAR BOTÓN SUSPEND ---
+
+- name: Comentar línea original visible - sddm.canSuspend
+  replace:
+    path: /usr/local/share/sddm/themes/{{ elarun_theme_name }}/Main.qml
+    regexp: 'visible:\s*sddm\.canSuspend'
+    replace: '/* visible: sddm.canSuspend */'
+  notify: Reiniciar SDDM
+
+- name: Añadir visible - false si no existe
+  lineinfile:
+    path: /usr/local/share/sddm/themes/{{ elarun_theme_name }}/Main.qml
+    insertafter: '\/\* visible: sddm\.canSuspend \*\/'
+    line: 'visible: false'
+    state: present
+  notify: Reiniciar SDDM

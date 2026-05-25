@@ -1,0 +1,15 @@
+# --- CAMBIAR FONDO CORPORATIVO ---
+
+- name: Copiar imagen de fondo
+  copy:
+    src: "{{ elarun_background_src }}"
+    dest: "/usr/local/share/sddm/themes/{{ elarun_theme_name }}/images/"
+    mode: '0644'
+  notify: Reiniciar SDDM
+
+- name: Configurar background en theme.conf del tema custom
+  lineinfile:
+    path: "/usr/local/share/sddm/themes/{{ elarun_theme_name }}/theme.conf"
+    regexp: '^background='
+    line: "background=/usr/local/share/sddm/themes/{{ elarun_theme_name }}/images/{{ elarun_background_src | basename }}"
+  notify: Reiniciar SDDM

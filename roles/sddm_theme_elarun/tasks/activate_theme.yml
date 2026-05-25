@@ -1,0 +1,22 @@
+# --- ACTIVAR EL TEMA EN SDDM (MODIFICANDO LÍNEA EXISTENTE) ---
+
+- name: Asegurar fichero theme.conf existe
+  file:
+    path: /etc/sddm.conf
+    state: touch
+    mode: '0644'
+
+- name: Configurar tema actual de SDDM correctamente
+  community.general.ini_file:
+    path: /etc/sddm.conf
+    section: Theme
+    option: Current
+    value: "{{ elarun_theme_name }}"
+    mode: '0644'
+  notify: Reiniciar SDDM
+
+- name: Exponer tema al sistema SDDM
+  file:
+    src: /usr/local/share/sddm/themes/{{ elarun_theme_name }}
+    dest: /usr/share/sddm/themes/{{ elarun_theme_name }}
+    state: link

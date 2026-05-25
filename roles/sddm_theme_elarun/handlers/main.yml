@@ -1,0 +1,6 @@
+# Reiniciar SDDM
+
+- name: Reiniciar SDDM
+  systemd:
+    name: sddm
+    state: restarted

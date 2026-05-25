@@ -1,0 +1,27 @@
+# INSTALACIÓN DEL TEMA SDDM ELARUN
+
+# Instalación de paquetes
+
+- name: Instalar tema Elarun
+  apt:
+    name: sddm-theme-elarun
+    state: present
+    update_cache: yes
+
+# --- CREAR TEMA CUSTOM EN /usr/local ---
+
+# Esto se hace para que actualizaciones en el tema original deshagan los cambios
+# de configuración hechos en los mismos
+
+- name: Crear directorio destino del tema custom
+  file:
+    path: "/usr/local/share/sddm/themes/{{ elarun_theme_name }}"
+    state: directory
+    mode: '0755'
+
+- name: Copiar tema Elarun correctamente
+  command: >
+    cp -a /usr/share/sddm/themes/elarun/.
+         /usr/local/share/sddm/themes/{{ elarun_theme_name }}
+  args:
+    creates: "/usr/local/share/sddm/themes/{{ elarun_theme_name }}/Main.qml"
