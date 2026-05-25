@@ -1,0 +1,52 @@
+# Extrae el último octeto de la dirección IPv4 principal.
+#
+# Ejemplo:
+#
+# 192.168.1.5
+#
+# Resultado:
+#
+# hostname_ip_octet=5
+
+- name: Obtener último octeto de IP
+  set_fact:
+    hostname_ip_octet: >-
+      {{
+        ansible_default_ipv4.address.split('.')[-1] | int
+      }}
+
+
+# Convierte el número a formato de tres cifras.
+#
+# Ejemplos:
+#
+# 5   → 005
+# 23  → 023
+# 121 → 121
+#
+# Esto facilita orden alfabético y consistencia visual.
+
+- name: Formatear número de PC a 3 cifras
+  set_fact:
+    hostname_pc_number: "{{ '%03d' | format(hostname_ip_octet | int) }}"
+
+
+# Construye el nombre definitivo:
+#
+# APrueba + PC + 005
+#
+# Resultado:
+#
+# APruebaPC005
+#
+# Se fuerza el nombre del aula a mayúsculas para mantener
+# consistencia entre aulas.
+
+- name: Construir hostname final
+  set_fact:
+    hostname_final: >-
+      {{
+        (hostname_classroom | upper)
+        ~ 'PC'
+        ~ hostname_pc_number
+      }}

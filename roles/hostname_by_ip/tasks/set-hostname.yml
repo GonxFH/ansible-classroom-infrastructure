@@ -1,0 +1,27 @@
+# Aplica el hostname generado previamente mediante el módulo
+# nativo de Ansible.
+#
+# Se utiliza el módulo hostname en lugar de comandos shell:
+#
+# hostnamectl
+# hostname
+#
+# porque:
+#
+# - es idempotente
+# - funciona en distintas distribuciones
+# - actualiza los mecanismos internos apropiados
+# - evita lógica adicional
+#
+# hostname_final debe haberse construido previamente en:
+#
+# build-hostname.yml
+#
+# Ejemplo:
+#
+# APRUEBAPC005
+
+
+- name: Aplicar hostname
+  hostname:
+    name: "{{ hostname_final }}"

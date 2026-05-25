@@ -1,0 +1,21 @@
+# Nombre o identificador del aula.
+# Debe sobrescribirse obligatoriamente desde inventario,
+# group_vars o playbook.
+#
+# Ejemplo:
+# hostname_classroom: APrueba
+#
+# Generará nombres tipo:
+# APruebaPC002
+
+hostname_classroom: DEFAULT
+
+
+# Dirección IP que se actualizará dentro de /etc/hosts
+# asociada al hostname local del equipo.
+#
+# En sistemas Debian/Ubuntu suele utilizarse 127.0.1.1
+# para evitar dependencias del hostname respecto a la IP
+# real de la interfaz de red.
+
+hostname_hosts_ip: "127.0.1.1"

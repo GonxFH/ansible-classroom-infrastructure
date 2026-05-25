@@ -1,0 +1,22 @@
+# Flujo principal del role:
+#
+# 1. Validación de parámetros y requisitos
+# 2. Construcción del hostname a partir de la IP
+# 3. Aplicación del hostname al sistema
+# 4. Actualización de resolución local en /etc/hosts
+#
+# Se separa en varios archivos para facilitar mantenimiento,
+# reutilización y ejecución parcial mediante tags.
+
+
+- import_tasks: validate.yml
+  tags: validate
+  
+- import_tasks: build-hostname.yml
+  tags: build
+  
+- import_tasks: set-hostname.yml
+  tags: set
+  
+- import_tasks: update-hosts.yml
+  tags: update

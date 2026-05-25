@@ -1,0 +1,36 @@
+# Verifica que se haya indicado un identificador de aula.
+#
+# Se utiliza DEFAULT como marcador interno para detectar
+# configuraciones olvidadas.
+#
+# Ejemplo válido:
+# hostname_classroom: Aula1
+#
+# Ejemplo inválido:
+# hostname_classroom: DEFAULT
+
+- name: Validar nombre de aula
+  assert:
+    that:
+      - hostname_classroom != "DEFAULT"
+      - hostname_classroom | length > 0
+    fail_msg: "Debes definir la variable hostname_classroom"
+
+
+# Comprueba que Ansible haya detectado una interfaz IPv4
+# principal.
+#
+# El hostname se genera utilizando el último octeto de la IP:
+#
+# 192.168.1.23 → PC023
+#
+# Si no existe IPv4, el role se detiene para evitar generar
+# nombres incorrectos.
+
+- name: Validar existencia de IPv4 por defecto
+  assert:
+    that:
+      - ansible_default_ipv4.address is defined
+      - ansible_default_ipv4.address | length > 0
+    fail_msg: "El equipo no tiene IPv4 por defecto"
+    

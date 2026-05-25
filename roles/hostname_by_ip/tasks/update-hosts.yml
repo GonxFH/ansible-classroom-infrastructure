@@ -1,0 +1,51 @@
+# Actualiza la resolución local del hostname dentro de
+# /etc/hosts.
+#
+# Ubuntu y derivados suelen utilizar una entrada local:
+#
+# 127.0.1.1 hostname
+#
+# para asociar el nombre del equipo sin depender de
+# la dirección IP real de la interfaz de red.
+#
+# La IP utilizada es configurable mediante:
+#
+# hostname_hosts_ip
+#
+# Valor por defecto:
+#
+# 127.0.1.1
+#
+# Esto evita problemas cuando:
+#
+# - cambia la IP real del equipo
+# - aún no existe conectividad
+# - DNS no está disponible
+#
+# regexp busca la entrada existente asociada a la IP
+# configurada y la sustituye por el nuevo hostname.
+#
+# Ejemplo:
+#
+# Entrada encontrada:
+#
+# 127.0.1.1 ubuntu
+#
+# Resultado:
+#
+# 127.0.1.1 APRUEBAPC005
+#
+# Se usa regex_escape para evitar problemas si la IP
+# contiene caracteres especiales interpretables en
+# expresiones regulares.
+#
+# lineinfile garantiza idempotencia:
+#
+# múltiples ejecuciones no crearán líneas duplicadas.
+
+- name: Actualizar entrada hostname en /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^{{ hostname_hosts_ip | regex_escape }}\s+'
+    line: "{{ hostname_hosts_ip }} {{ hostname_final }}"
+    state: present
