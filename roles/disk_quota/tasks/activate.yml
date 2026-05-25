@@ -1,0 +1,30 @@
+- name: Activar usrquota y grpquota en /
+  replace:
+    path: /etc/fstab
+    regexp: '(^.*\s/\s.*ext4\s+.*)$'
+    replace: '\1,usrquota,grpquota'
+  register: fstab_changed
+
+- name: Remontar /
+  command: mount -o remount,usrquota,grpquota /
+  when: fstab_changed.changed
+
+- name: Verificar opciones de montaje en /
+  command: findmnt -no OPTIONS /
+  register: mount_opts
+  changed_when: false
+
+- debug:
+    var: mount_opts.stdout
+
+- name: Comprobar que usrquota está activo
+  fail:
+    msg: "El sistema no tiene usrquota activado en /"
+  when: mount_opts.stdout is not search("usrquota")
+  
+- name: Ejecutar quotacheck
+  command: quotacheck -cugm /
+  when: mount_opts.stdout is search("usrquota")
+  
+- name: Activar cuotas
+  command: quotaon /

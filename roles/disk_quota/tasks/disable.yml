@@ -1,0 +1,2 @@
+- import_tasks: deactivate.yml
+- import_tasks: uninstall.yml

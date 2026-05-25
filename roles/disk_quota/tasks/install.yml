@@ -1,0 +1,5 @@
+- name: Instalar quota
+  apt:
+    name: quota
+    state: present
+    update_cache: yes

@@ -1,0 +1,7 @@
+- name: Comprobar cuotas activas
+  command: quota -v
+  register: quota_status
+  changed_when: false
+
+- debug:
+    var: quota_status.stdout

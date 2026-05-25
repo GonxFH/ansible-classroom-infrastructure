@@ -1,0 +1,19 @@
+- name: Desactivar cuotas
+  command: quotaoff -a
+  
+- name: Eliminar usrquota/grpquota de fstab
+  replace:
+    path: /etc/fstab
+    regexp: '\busrquota\b|\bgrpquota\b'
+    replace: ''
+    
+- name: Remontar /
+  command: mount -o remount /
+  
+- name: Eliminar ficheros quota
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /aquota.user
+    - /aquota.group

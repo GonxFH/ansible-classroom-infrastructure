@@ -1,0 +1,15 @@
+- name: Comprobar sistema de archivos
+  command: findmnt -no FSTYPE /
+  register: fs_type
+  changed_when: false
+
+- name: Fallar si no es ext4
+  fail:
+    msg: "El sistema de archivos no soporta quotas de forma estándar"
+  when: fs_type.stdout != "ext4"
+
+- import_tasks: enable.yml
+  when: quota_state == "enabled"
+
+- import_tasks: disable.yml
+  when: quota_state == "disabled"

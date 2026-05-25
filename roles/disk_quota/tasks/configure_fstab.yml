@@ -1,0 +1,6 @@
+- name: Activar usrquota y grpquota en /
+  replace:
+    path: /etc/fstab
+    regexp: '(^.*\s/\s.*ext4\s+.*)$'
+    replace: '\1,usrquota,grpquota'
+  register: fstab_changed
