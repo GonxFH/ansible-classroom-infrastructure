@@ -1,0 +1,24 @@
+# Instala paquetes Snap definidos en perfiles.
+#
+# Soporta:
+#
+# - classic confinement
+# - canales específicos
+#
+# Ejemplo:
+#
+# - name: code
+#   classic: true
+#   channel: latest/stable
+
+- name: Instalar paquetes snap
+  community.general.snap:
+    name: "{{ item.name }}"
+    classic: "{{ item.classic | default(false) }}"
+    channel: "{{ item.channel | default(omit) }}"
+    state: present
+  loop: "{{ software_snap | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - software_snap | default([]) | length > 0

@@ -1,0 +1,37 @@
+# Flujo principal del role.
+#
+# El proceso se divide en tareas independientes para:
+#
+# - facilitar mantenimiento
+# - permitir depuración
+# - simplificar ampliaciones futuras
+# - reutilizar partes concretas
+#
+# Orden de ejecución:
+#
+# 1. Validar parámetros
+# 2. Cargar perfiles
+# 3. Instalar APT
+# 4. Instalar Snap
+# 5. Instalar Flatpak
+# 6. Instalar paquetes .deb
+# 7. Instalar futuros roles auxiliares 
+#    (aplicaciones con instalación más compleja, 
+#     con role propio de instalación)
+# 8. Limpieza final
+
+- import_tasks: validate.yml
+
+- import_tasks: load_profiles.yml
+
+- import_tasks: install_apt.yml
+
+- import_tasks: install_snap.yml
+
+- import_tasks: install_flatpak.yml
+
+- import_tasks: install_deb.yml
+
+- import_tasks: install_roles.yml
+
+- import_tasks: cleanup.yml

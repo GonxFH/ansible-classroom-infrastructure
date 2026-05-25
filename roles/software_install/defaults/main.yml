@@ -1,0 +1,126 @@
+# Directorio que contiene los perfiles de software.
+#
+# Cada perfil es un fichero YAML independiente que define
+# listas de aplicaciones agrupadas por mecanismo de instalación:
+#
+# - apt
+# - snap
+# - flatpak
+# - deb
+# - roles
+#
+# Ejemplo:
+#
+# software/software_profiles
+# ├── base.yml
+# ├── programacion.yml
+# └── profesor_X.yml
+#
+# Se utiliza playbook_dir para que la ruta sea relativa
+# al proyecto y no dependa del directorio actual desde
+# donde se ejecuta Ansible.
+
+software_repository: "{{ playbook_dir }}/../software/software_profiles"
+
+# Directorio que almacena paquetes .deb locales.
+#
+# Permite mantener instaladores propios del centro o
+# aplicaciones descargadas previamente.
+#
+# Ejemplo:
+#
+# software/software_deb/
+# ├── chrome.deb
+# ├── netbeans.deb
+# └── programaInterno.deb
+
+software_deb_repository: "{{ playbook_dir }}/../software/software_deb"
+
+
+# Directorio temporal donde se copian o descargan
+# paquetes .deb antes de instalarse.
+#
+# Tanto los paquetes locales como remotos terminan aquí
+# para unificar el proceso de instalación.
+#
+# Por defecto, se usa /tmp porque:
+#
+# - es escribible
+# - es temporal
+# - no requiere mantenimiento
+#
+# El directorio se recrea automáticamente en cada ejecución.
+
+software_deb_temp_dir: /tmp/software_deb
+
+
+# Lista de perfiles que se desean aplicar.
+#
+# Puede contener uno o varios perfiles.
+#
+# Ejemplo:
+#
+# software_profiles:
+#   - base
+#   - programacion
+#   - profesor_X
+#
+# Los perfiles se combinan acumulando el software definido
+# en todos ellos.
+#
+# Debe definirse obligatoriamente.
+
+software_profiles: []
+
+# Indica si debe ejecutarse actualización de índices APT
+# antes de instalar paquetes.
+#
+# Equivale aproximadamente a:
+#
+# apt update
+#
+# Evita errores cuando los índices están desactualizados.
+
+software_install_update_cache: true
+
+
+# Variable reservada para futuras ampliaciones.
+#
+# Se prevé permitir actualización automática de paquetes
+# ya instalados antes de realizar nuevas instalaciones.
+#
+# Actualmente no se utiliza.
+
+software_install_upgrade_cache: false
+
+
+# Ejecuta limpieza completa de caché APT al finalizar.
+#
+# Equivale a:
+#
+# apt clean
+#
+# Elimina todos los paquetes descargados de:
+#
+# /var/cache/apt/archives
+#
+# Puede liberar espacio en equipos con almacenamiento
+# limitado.
+
+software_full_clean: false
+
+
+# Elimina paquetes .deb temporales una vez instalados.
+#
+# Si es false:
+#
+# /tmp/software_deb/* (o directorio establecido en la variable)
+#
+# permanecerá disponible hasta limpieza automática/manual
+# del sistema.
+#
+# Si es true:
+#
+# se eliminarán tras instalación.
+
+software_remove_deb_after_install: false

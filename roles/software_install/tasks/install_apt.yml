@@ -1,0 +1,24 @@
+# Actualiza índices APT únicamente si:
+#
+# - está habilitado
+# - existen paquetes APT a instalar
+#
+# Evita operaciones innecesarias.
+
+- name: Actualizar cache apt
+  apt:
+    update_cache: true
+  when:
+    - software_install_update_cache
+    - software_apt | length > 0
+
+# Instala todos los paquetes acumulados.
+#
+# El módulo apt es idempotente:
+#
+# paquetes ya instalados no se reinstalan.
+    
+- name: Instalar paquetes apt
+  apt:
+    name: "{{ software_apt }}"
+    state: present

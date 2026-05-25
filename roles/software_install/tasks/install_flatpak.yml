@@ -1,0 +1,29 @@
+# Instala soporte Flatpak si aún no existe.
+
+- name: Instalar flatpak
+  apt:
+    name: flatpak
+    state: present
+
+# Añade repositorio Flathub.
+#
+# Flathub es el repositorio principal utilizado
+# por la mayoría de aplicaciones Flatpak.
+
+- name: Añadir flathub
+  flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+
+# Instala aplicaciones Flatpak definidas
+# en los perfiles.
+
+- name: Instalar flatpak
+  community.general.flatpak:
+    name: "{{ item }}"
+    remote: flathub
+    state: present
+  loop: "{{ software_flatpak }}"
+  when:
+    - software_flatpak | length > 0

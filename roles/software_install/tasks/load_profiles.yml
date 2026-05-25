@@ -1,0 +1,206 @@
+# Inicializa listas vacías donde se acumularán paquetes
+# procedentes de múltiples perfiles.
+#
+# Esto permite combinar:
+#
+# base + modulo/asignatura X + profesor Y
+#
+# en una única ejecución.
+
+- name: Inicializar listas
+  set_fact:
+    software_apt: []
+    software_snap: []
+    software_flatpak: []
+    software_deb: []
+    software_roles: []
+
+# Cada perfil puede definir software de distintos tipos.
+#
+# Se cargan dinámicamente y posteriormente se unifican
+# en listas acumuladas.
+#
+# Esto permite construir perfiles reutilizables y
+# combinables entre sí.
+
+# Carga dinámicamente cada perfil.
+#
+# include_vars importa variables desde YAML y las guarda
+# temporalmente en:
+#
+# current_profile
+
+- name: Leer perfiles
+  include_vars:
+    file: "{{ software_repository }}/{{ item }}.yml"
+    name: current_profile
+  loop: "{{ software_profiles }}"
+  register: loaded_profiles
+
+# Acumula software APT definido en todos los perfiles.
+#
+# Se asegura que la misma aplicación no aparece dos veces.
+#
+# Ejemplo:
+#
+# base:
+#   firefox
+#
+# programacion:
+#   netbeans
+#
+# Resultado:
+#
+# firefox + netbeans
+
+- name: Acumular paquetes apt
+  set_fact:
+    software_apt: >-
+      {{
+        (
+          software_apt
+          + (item.ansible_facts.current_profile.apt | default([]))
+        )
+        | unique
+      }}
+  loop: "{{ loaded_profiles.results }}"
+ 
+
+# Acumula software snap definido en todos los perfiles.
+#
+# Se asegura que la misma aplicación no aparece dos veces.
+#
+# Ejemplo:
+#
+# base:
+#   firefox
+#
+# programacion:
+#   netbeans
+#
+# Resultado:
+#
+# firefox + netbeans
+
+- name: Acumular snaps
+  set_fact:
+    software_snap: >-
+      {{
+        (
+          software_snap
+          + (item.ansible_facts.current_profile.snap | default([]))
+        )
+        | unique
+      }}
+  loop: "{{ loaded_profiles.results }}"
+  
+# Acumula software flatpak definido en todos los perfiles.
+#
+# Se asegura que la misma aplicación no aparece dos veces.
+#
+# Ejemplo:
+#
+# base:
+#   firefox
+#
+# programacion:
+#   netbeans
+#
+# Resultado:
+#
+# firefox + netbeans
+  
+- name: Acumular flatpak
+  set_fact:
+    software_flatpak: >-
+      {{
+        (
+          software_flatpak
+          + (item.ansible_facts.current_profile.flatpak | default([]))
+        )
+        | unique
+      }}
+  loop: "{{ loaded_profiles.results }}"
+
+# Acumula software .deb definido en todos los perfiles.
+#
+# Se asegura que la misma aplicación no aparece dos veces.
+#
+# Ejemplo:
+#
+# base:
+#   firefox
+#
+# programacion:
+#   netbeans
+#
+# Resultado:
+#
+# firefox + netbeans
+
+- name: Acumular paquetes deb
+  set_fact:
+    software_deb: >-
+      {{
+        (
+          software_deb
+          + (item.ansible_facts.current_profile.deb | default([]))
+        )
+        | unique
+      }}
+  loop: "{{ loaded_profiles.results }}"
+
+# Acumula roles definidos en todos los perfiles.
+# (roles = aplicaciones más complejas de instalar
+#          con su propio role de instalación )
+#
+# Se asegura que el mismo role no aparece dos veces.
+#
+# Ejemplo:
+#
+# base:
+#   docker
+#
+# programacion:
+#   virtualbox
+#
+# Resultado:
+#
+# docker + virtualbox
+
+
+# VOLVER A DOCUMENTAR
+- name: Acumular roles
+  set_fact:
+    software_roles: >-
+      {{
+        software_roles
+        + (item.ansible_facts.current_profile.roles | default([]))
+      }}
+  loop: "{{ loaded_profiles.results }}"
+
+- name: Normalizar roles (último gana)
+  set_fact:
+    software_roles: >-
+      {{
+        software_roles
+        | reverse
+        | unique(attribute='name')
+        | reverse
+      }}
+      
+- name: DEBUG roles finales
+  debug:
+    var: software_roles
+
+# Muestra listas resultantes para depuración.
+#
+# Útil para verificar combinación de perfiles.
+  
+- debug:
+    msg:
+      apt: "{{ software_apt }}"
+      snap: "{{ software_snap }}"
+      flatpak: "{{ software_flatpak }}"
+      deb: "{{ software_deb }}"
+      roles: "{{ software_roles }}"

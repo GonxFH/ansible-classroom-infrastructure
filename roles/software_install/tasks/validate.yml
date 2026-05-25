@@ -1,0 +1,79 @@
+# Verifica que exista al menos un perfil definido.
+#
+# El role necesita perfiles para saber qué software
+# instalar.
+#
+# Sin perfiles no existe una acción válida a ejecutar.
+
+- name: Comprobar perfiles definidos
+  assert:
+    that:
+      - software_profiles | length > 0
+    fail_msg: >
+      Debes definir software_profiles
+
+# Comprueba si cada fichero de perfil existe realmente.
+#
+# La comprobación se realiza en localhost porque los
+# perfiles están almacenados en la máquina que ejecuta
+# Ansible y no en los equipos remotos.
+
+- name: Verificar perfiles existentes
+  stat:
+    path: "{{ software_repository }}/{{ item }}.yml"
+  loop: "{{ software_profiles }}"
+  register: profile_files
+  delegate_to: localhost
+  become: false
+
+# Si falta un perfil se detiene inmediatamente la ejecución.
+#
+# Ejemplo:
+#
+# software_profiles:
+#   - base
+#   - profesor
+#
+# Si profesor.yml no existe:
+#
+# la instalación se abortará.
+
+- name: Fallar si falta algún perfil
+  fail:
+    msg: >
+      No existe:
+      {{ item.item }}.yml
+  when: not item.stat.exists
+  loop: "{{ profile_files.results }}"
+
+# Comprueba si cada role existe realmente.
+#
+# La comprobación se realiza en localhost porque los
+# roles están almacenados en la máquina que ejecuta
+# Ansible y no en los equipos remotos.
+
+- name: Comprobar que los roles existen
+  stat:
+    path: "{{ playbook_dir }}/../roles/{{ item }}"
+  loop: "{{ software_roles | default([]) }}"
+  register: role_check
+  delegate_to: localhost
+  become: false
+
+# Si falta un role se detiene inmediatamente la ejecución.
+#
+# Ejemplo:
+#
+# software_roles:
+#   - gns3
+#   - virtualbox
+#
+# Si el role gns3 no existe:
+#
+# la instalación se abortará.
+
+- name: Fallar si falta un role
+  fail:
+    msg: "No existe el role {{ item.item }}"
+  when: not item.stat.exists
+  loop: "{{ role_check.results }}"

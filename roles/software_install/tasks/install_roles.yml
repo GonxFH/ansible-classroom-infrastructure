@@ -1,0 +1,39 @@
+# Ejecuta roles adicionales definidos dinámicamente.
+#
+# Este mecanismo permite extender el comportamiento del
+# role software_install sin modificar su código base.
+#
+# En lugar de añadir lógica aquí, se delega en otros roles
+# independientes.
+#
+# Estos otros roles corresponderían a otras aplicaciones
+# de instalación más compleja y que merecen un role idependiente
+#
+# Ejemplo de uso:
+#
+# software_roles:
+#   - virtualbox
+#   - docker
+#   - gns3
+#
+# Cada elemento debe corresponder al nombre de un role
+# existente en el sistema de Ansible.
+#
+# Esto convierte el sistema en una arquitectura modular
+# basada en plugins.
+#
+# IMPORTANTE:
+# Los roles incluidos aquí se ejecutan dentro del mismo
+# contexto del play, compartiendo variables y estado.
+
+
+# ADAPTAR DOCUMENTACIÓN
+
+- name: Ejecutar roles adicionales
+  include_role:
+    name: advanced_software_management/{{ item.name }}
+  vars:
+    software_state: "{{ item.state | default('present') }}"
+  loop: "{{ software_roles | default([]) }}"
+  loop_control:
+    label: "{{ item.name }} ({{ item.state | default('present') }})"

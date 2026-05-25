@@ -1,0 +1,62 @@
+# Crea directorio temporal para normalizar
+# instalación de paquetes locales y remotos.
+
+- name: Crear directorio temporal para deb
+  file:
+    path: "{{ software_deb_temp_dir }}"
+    state: directory
+    mode: '0755'
+
+
+# DEB locales
+# Copia .deb locales desde repositorio interno.
+
+- name: Copiar paquetes deb locales
+  copy:
+    src: "{{ software_deb_repository }}/{{ item }}"
+    dest: "{{ software_deb_temp_dir }}/{{ item | basename }}"
+    mode: '0644'
+  loop: "{{ software_deb | default([]) }}"
+  when:
+    - item is not match('^https?://')
+
+
+# DEB remotos
+# Descarga paquetes remotos vía HTTP/HTTPS.
+
+- name: Descargar paquetes deb remotos
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ software_deb_temp_dir }}/{{ item | basename }}"
+    mode: '0644'
+  loop: "{{ software_deb | default([]) }}"
+  when:
+    - item is match('^https?://')
+
+
+# Instala paquetes usando apt en lugar de dpkg.
+#
+# apt resuelve automáticamente dependencias.
+
+- name: Esperar a que dpkg/apt esté libre
+  shell: |
+    while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+      sleep 2
+    done
+  changed_when: false
+
+- name: Instalar paquetes deb
+  apt:
+    deb: "{{ software_deb_temp_dir }}/{{ item | basename }}"
+  loop: "{{ software_deb | default([]) }}"
+  
+
+# Limpieza opcional de instaladores temporales en el remoto.
+
+- name: Eliminar deb temporales
+  file:
+    path: "{{ software_deb_temp_dir }}/{{ item | basename }}"
+    state: absent
+  loop: "{{ software_deb | default([]) }}"
+  when:
+    - software_remove_deb_after_install | default(false)

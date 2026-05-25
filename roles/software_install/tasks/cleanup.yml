@@ -1,0 +1,20 @@
+# Elimina dependencias huérfanas que ya no son necesarias.
+
+- name: Eliminar dependencias innecesarias
+  apt:
+    autoremove: yes
+
+# Elimina paquetes descargados obsoletos
+# conservando la caché útil.
+
+- name: Limpiar paquetes obsoletos descargados
+  apt:
+    autoclean: yes
+
+# Vacía completamente la caché local APT.
+#
+# Acción más agresiva que autoclean.
+    
+- name: Vaciar completamente la caché
+  command: apt clean
+  when: software_full_clean
