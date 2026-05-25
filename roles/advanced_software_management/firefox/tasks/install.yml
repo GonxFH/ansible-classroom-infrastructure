@@ -1,0 +1,51 @@
+- name: Eliminar Firefox Snap (si existe)
+  community.general.snap:
+    name: firefox
+    state: absent
+  register: firefox_snap_remove
+  failed_when: false
+  changed_when: firefox_snap_remove is changed
+
+- name: Eliminar Firefox stub de Ubuntu
+  apt:
+    name: firefox
+    state: absent
+    purge: true
+
+- name: Crear directorio keyrings
+  file:
+    path: "{{ firefox_keyring_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Descargar clave pública Mozilla
+  get_url:
+    url: https://packages.mozilla.org/apt/repo-signing-key.gpg
+    dest: "{{ firefox_keyring_dir }}/{{ firefox_keyring_file }}"
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Añadir repositorio Firefox Mozilla (modo manual)
+  copy:
+    dest: /etc/apt/sources.list.d/mozilla.list
+    content: "{{ firefox_repo }}"
+    mode: '0644'
+
+- name: Configurar prioridad APT para Mozilla
+  copy:
+    dest: "{{ firefox_preferences_file }}"
+    content: |
+      Package: *
+      Pin: origin packages.mozilla.org
+      Pin-Priority: 1000
+
+- name: Actualizar cache apt
+  apt:
+    update_cache: true
+  when: firefox_update_cache
+
+- name: Instalar Firefox
+  apt:
+    name: "{{ firefox_package }}"
+    state: present

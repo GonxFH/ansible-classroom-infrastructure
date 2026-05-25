@@ -1,0 +1,14 @@
+firefox_package: firefox
+firefox_state: present
+
+firefox_keyring_dir: /etc/apt/keyrings
+firefox_keyring_file: packages.mozilla.org.asc
+
+firefox_repo: "deb [signed-by={{ firefox_keyring_dir }}/{{ firefox_keyring_file }}] https://packages.mozilla.org/apt mozilla main"
+
+firefox_preferences_file: /etc/apt/preferences.d/mozilla-firefox
+
+firefox_update_cache: true
+
+firefox_remove_repository: true
+firefox_remove_dependencies: true

@@ -1,0 +1,41 @@
+- name: Eliminar Firefox
+  apt:
+    name: "{{ firefox_package }}"
+    state: absent
+    purge: true
+
+- name: Eliminar dependencias
+  apt:
+    autoremove: true
+    purge: true
+  when: firefox_remove_dependencies
+
+# =========================
+# REPOSITORIO (SIMÉTRICO)
+# =========================
+
+- name: Eliminar repositorio Mozilla
+  file:
+    path: /etc/apt/sources.list.d/mozilla.list
+    state: absent
+  when: firefox_remove_repository
+
+- name: Eliminar pinning Mozilla
+  file:
+    path: "{{ firefox_preferences_file }}"
+    state: absent
+  when: firefox_remove_repository
+
+- name: Eliminar clave Mozilla
+  file:
+    path: "{{ firefox_keyring_dir }}/{{ firefox_keyring_file }}"
+    state: absent
+  when: firefox_remove_repository
+
+# =========================
+# ACTUALIZAR CACHE
+# =========================
+
+- name: Actualizar cache apt
+  apt:
+    update_cache: true

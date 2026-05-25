@@ -1,0 +1,5 @@
+- import_tasks: install.yml
+  when: firefox_state == "present"
+
+- import_tasks: uninstall.yml
+  when: firefox_state == "absent"
