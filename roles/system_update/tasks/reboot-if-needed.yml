@@ -1,0 +1,35 @@
+# Comprueba si el sistema requiere reinicio tras una
+# actualización del sistema.
+#
+# Ubuntu crea el archivo:
+#
+# /run/reboot-required
+#
+# cuando es necesario reiniciar (kernel, libc, etc.).
+#
+# Si el archivo existe y la opción auto_reboot está activa,
+# se ejecuta un reinicio controlado del sistema.
+
+- name: Comprobar si Ubuntu requiere reinicio
+  stat:
+    path: /run/reboot-required
+  register: reboot_required
+
+
+# Reinicia el sistema de forma controlada si:
+#
+# - el sistema lo requiere
+# - el reinicio automático está habilitado
+#
+# El módulo reboot:
+# - espera a que el host vuelva a estar disponible
+# - valida reconexión SSH
+# - evita bloqueos del playbook
+
+- name: Reiniciar si es necesario
+  reboot:
+    reboot_timeout: "{{ system_update_reboot_timeout }}"
+    msg: "Reinicio automático tras actualización"
+  when:
+    - system_update_auto_reboot
+    - reboot_required.stat.exists

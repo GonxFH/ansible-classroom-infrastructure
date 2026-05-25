@@ -1,0 +1,52 @@
+# Tipo de actualización que realizará APT.
+#
+# Valores habituales:
+#
+# safe     → actualiza paquetes sin eliminar ni instalar dependencias
+# full     → actualización completa
+# dist     → permite cambios de dependencias y reemplazos
+#
+# Se utiliza "dist" por ser apropiado para mantenimiento
+# automatizado de aulas y permitir actualizaciones más
+# completas del sistema.
+
+system_update_upgrade_type: dist
+
+
+# Tiempo (segundos) durante el cual la caché de paquetes
+# se considera válida.
+#
+# Si la caché es más reciente que este valor, Ansible
+# evitará descargar nuevamente la información de paquetes.
+#
+# Valor por defecto:
+#
+# 3600 = 1 hora
+#
+# Reduce tráfico y acelera ejecuciones repetidas.
+
+system_update_cache_valid_time: 3600
+
+
+# Elimina automáticamente paquetes instalados como
+# dependencias que ya no son necesarios.
+#
+# Equivale a:
+#
+# apt autoremove
+#
+# Ayuda a mantener las imágenes del aula más limpias.
+
+system_update_autoremove: true
+
+
+# Activa o desactiva el reinicio automático del sistema
+# cuando se detecta que es necesario tras una actualización.
+
+system_update_auto_reboot: true
+
+# Tiempo máximo de espera para que el sistema complete el
+# reinicio y vuelva a estar disponible por SSH.
+
+system_update_reboot_timeout: 600
+

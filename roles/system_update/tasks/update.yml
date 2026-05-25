@@ -1,0 +1,22 @@
+# Realiza mantenimiento básico del sistema mediante APT:
+#
+# 1. Actualiza índice de paquetes
+# 2. Actualiza paquetes instalados
+# 3. Elimina dependencias obsoletas
+#
+# Se utiliza el módulo apt de Ansible porque:
+#
+# - es idempotente
+# - evita comandos shell
+# - integra actualización y limpieza
+# - proporciona mejor control de errores
+#
+# cache_valid_time evita actualizaciones innecesarias
+# del índice de paquetes en ejecuciones consecutivas.
+
+- name: Actualizar sistema
+  apt:
+    update_cache: yes
+    cache_valid_time: "{{ system_update_cache_valid_time }}"
+    upgrade: "{{ system_update_upgrade_type }}"
+    autoremove: "{{ system_update_autoremove }}"

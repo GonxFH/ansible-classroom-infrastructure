@@ -1,0 +1,14 @@
+# Flujo principal del role system_update:
+#
+# 1. Actualización del sistema mediante APT
+# 2. Comprobación de si el sistema requiere reinicio
+# 3. Reinicio automático si está habilitado y es necesario
+#
+# Se separa en tareas independientes para mejorar:
+# - mantenimiento
+# - reutilización
+# - depuración
+# - ejecución parcial si es necesario
+
+- import_tasks: update.yml
+- import_tasks: reboot-if-needed.yml
