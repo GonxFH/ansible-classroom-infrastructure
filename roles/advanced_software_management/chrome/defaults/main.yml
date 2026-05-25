@@ -1,0 +1,15 @@
+chrome_package: google-chrome-stable
+chrome_state: present
+
+chrome_keyring_dir: /etc/apt/keyrings
+chrome_keyring_file: google-chrome.gpg
+
+chrome_repo: >-
+  deb [arch=amd64 signed-by={{ chrome_keyring_dir }}/{{ chrome_keyring_file }}]
+  https://dl.google.com/linux/chrome/deb/ stable main
+
+chrome_update_cache: true
+
+chrome_remove_repository: true
+chrome_remove_dependencies: true
+

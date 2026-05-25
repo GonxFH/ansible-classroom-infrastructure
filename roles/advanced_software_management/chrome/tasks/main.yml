@@ -1,0 +1,5 @@
+- import_tasks: install.yml
+  when: chrome_state == "present"
+
+- import_tasks: uninstall.yml
+  when: chrome_state == "absent"

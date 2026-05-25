@@ -1,0 +1,48 @@
+- name: Crear directorio keyrings
+  file:
+    path: "{{ chrome_keyring_dir }}"
+    state: directory
+    mode: '0755'
+
+
+- name: Descargar clave pública de Google
+  get_url:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+    dest: /tmp/google-linux-signing-key.pub
+    mode: '0644'
+
+
+- name: Convertir clave a formato gpg
+  command:
+    cmd: >
+      gpg --dearmor
+      -o {{ chrome_keyring_dir }}/{{ chrome_keyring_file }}
+      /tmp/google-linux-signing-key.pub
+  args:
+    creates: "{{ chrome_keyring_dir }}/{{ chrome_keyring_file }}"
+
+
+- name: Añadir repositorio Chrome
+  apt_repository:
+    repo: "{{ chrome_repo }}"
+    filename: google-chrome
+    state: present
+    update_cache: false
+
+
+- name: Actualizar cache apt
+  apt:
+    update_cache: true
+  when: chrome_update_cache
+
+
+- name: Instalar Chrome
+  apt:
+    name: "{{ chrome_package }}"
+    state: "{{ chrome_state }}"
+
+
+- name: Eliminar fichero temporal clave
+  file:
+    path: /tmp/google-linux-signing-key.pub
+    state: absent
