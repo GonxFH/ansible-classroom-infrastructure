@@ -1,7 +1,7 @@
 # Actualiza índices APT únicamente si:
 #
 # - está habilitado
-# - existen paquetes APT a instalar
+# - existen algo a instalar (da igual que sea apt)
 #
 # Evita operaciones innecesarias.
 
@@ -10,13 +10,19 @@
     update_cache: true
   when:
     - software_install_update_cache
-    - software_apt | length > 0
+    - >
+      software_apt | length > 0
+      or software_flatpak | length > 0
+      or software_deb | length > 0
+      or software_roles | length > 0
 
 # Instala todos los paquetes acumulados.
 #
 # El módulo apt es idempotente:
 #
 # paquetes ya instalados no se reinstalan.
+
+- import_tasks: wait_apt_lock.yml
     
 - name: Instalar paquetes apt
   apt:

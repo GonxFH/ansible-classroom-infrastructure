@@ -124,3 +124,10 @@ software_full_clean: false
 # se eliminarán tras instalación.
 
 software_remove_deb_after_install: false
+
+
+# Tiempo máximo de espera para locks de APT/dpkg.
+#
+# Evita fallos cuando unattended-upgrades está activo.
+
+software_apt_lock_timeout: 300

@@ -1,9 +1,14 @@
 # Instala soporte Flatpak si aún no existe.
 
-- name: Instalar flatpak
+- name: Instalar soporte flatpak
   apt:
     name: flatpak
     state: present
+  when:
+    - software_flatpak | length > 0
+
+
+
 
 # Añade repositorio Flathub.
 #
@@ -15,6 +20,9 @@
     name: flathub
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  when:
+    - software_flatpak | length > 0
+
 
 # Instala aplicaciones Flatpak definidas
 # en los perfiles.

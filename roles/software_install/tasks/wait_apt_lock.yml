@@ -1,0 +1,26 @@
+# Espera a que APT/dpkg quede libre.
+#
+# Ubuntu puede ejecutar automáticamente:
+#
+# - unattended-upgrades
+# - apt-daily
+# - apt-daily-upgrade
+#
+# especialmente tras arranque o clonación.
+#
+# Mientras exista el lock:
+#
+# /var/lib/dpkg/lock-frontend
+#
+# no pueden ejecutarse operaciones APT.
+#
+# Esta tarea espera hasta que el lock desaparezca.
+
+- name: Esperar desbloqueo de APT
+  shell: |
+    timeout {{ software_apt_lock_timeout }} bash -c '
+      while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+        sleep 2
+      done
+    '
+  changed_when: false
