@@ -1,0 +1,36 @@
+# INSTALACIÓN
+
+- import_tasks: install.yml
+  when: software_state == "present"
+
+- import_tasks: config.yml
+  when: software_state == "present"
+
+- import_tasks: keys.yml
+  when: software_state == "present"
+
+- import_tasks: hide_launchers.yml
+  when:
+    - software_state == "present"
+    - veyon_manage_launchers
+    - veyon_hide_launchers
+
+#- import_tasks: show-menu-launchers-to-users-list.yml
+#  when: 
+#    - veyon_manage_launchers
+#    - veyon_hide_launchers
+#    - veyon_launcher_visible_users | length > 0
+#  tags: launchers
+
+
+
+# DESINSTALACIÓN
+
+- import_tasks: uninstall.yml
+  when: software_state == "absent"
+
+- import_tasks: unhide_launchers.yml
+  when:
+    - software_state == "absent"
+    - veyon_manage_launchers
+

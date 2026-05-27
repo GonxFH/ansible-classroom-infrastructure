@@ -1,0 +1,22 @@
+- name: Detener servicio Veyon
+  systemd:
+    name: veyon.service
+    state: stopped
+    enabled: false
+  failed_when: false
+
+
+- name: Desinstalar paquetes Veyon
+  apt:
+    name:
+      - veyon-configurator
+      - veyon-service
+    state: absent
+    purge: true
+    autoremove: true
+
+
+- name: Eliminar claves Veyon
+  file:
+    path: /etc/veyon
+    state: absent

@@ -1,0 +1,6 @@
+# Reiniciar Veyon
+
+- name: reiniciar veyon
+  systemd:
+    name: veyon.service
+    state: restarted

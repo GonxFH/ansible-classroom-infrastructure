@@ -1,0 +1,11 @@
+# INSTALACIÓN DE VEYON EN ORDENADOR DE ESTUDIANTE
+
+# Instalación de paquetes
+
+- name: Instalar paquetes Veyon estudiante
+  apt:
+    name:
+      - veyon-configurator
+      - veyon-service
+    state: present
+    update_cache: true

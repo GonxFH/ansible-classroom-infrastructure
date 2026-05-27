@@ -1,0 +1,89 @@
+#
+
+- name: No hacer nada si no hay usuarios visibles definidos
+  meta: end_host
+  when: veyon_launcher_visible_users | length == 0
+
+- name: Obtener usuarios del sistema
+  getent:
+    database: passwd
+
+- name: Filtrar usuarios existentes
+  set_fact:
+    veyon_existing_users: >-
+      {{
+        veyon_launcher_visible_users
+        | select('in', ansible_facts.getent_passwd.keys())
+        | list
+      }}
+  
+- name: Detectar usuarios inexistentes
+  set_fact:
+    veyon_missing_users: "{{ veyon_launcher_visible_users | difference(veyon_existing_users) }}"
+    
+- name: Avisar de usuarios inexistentes
+  debug:
+    msg: "Estos usuarios no existen y se ignorarán: {{ veyon_missing_users }}"
+  when: veyon_missing_users | length > 0
+
+- name: Construir diccionario usuario → home
+  set_fact:
+    veyon_user_homes: >-
+      {{
+        dict(
+          veyon_existing_users
+          | zip(
+              veyon_existing_users
+              | map('extract', ansible_facts.getent_passwd)
+              | map('last')
+            )
+        )
+      }}
+  
+- name: Crear directorios de aplicaciones por usuario
+  file:
+    path: "{{ veyon_user_homes[item] }}/.local/share/applications"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+  loop: "{{ veyon_existing_users }}"
+
+- name: Configurar lanzadores visibles por usuario
+  block:
+
+    - name: Copiar lanzadores
+      copy:
+        src: "{{ item }}"
+        dest: "{{ veyon_user_homes[user] }}/.local/share/applications/{{ item | basename }}"
+        remote_src: yes
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: '0644'
+      loop:
+        - /usr/share/applications/veyon-configurator.desktop
+        - /usr/share/applications/x11vnc.desktop
+
+    - name: Hacer visibles los lanzadores
+      ini_file:
+        path: "{{ veyon_user_homes[user] }}/.local/share/applications/{{ item }}"
+        section: Desktop Entry
+        option: NoDisplay
+        value: "false"
+      loop:
+        - veyon-configurator.desktop
+        - x11vnc.desktop
+
+    - name: Ajustar categoría de los lanzadores
+      ini_file:
+        path: "{{ veyon_user_homes[user] }}/.local/share/applications/{{ item }}"
+        section: Desktop Entry
+        option: Categories
+        value: "{{ veyon_launcher_category | default('RemoteAccess;') }}"
+      loop:
+        - veyon-configurator.desktop
+        - x11vnc.desktop
+
+  loop: "{{ veyon_existing_users }}"
+  loop_control:
+    loop_var: user

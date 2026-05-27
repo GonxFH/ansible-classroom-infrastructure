@@ -1,0 +1,45 @@
+# Estado deseado del software
+#
+# present -> instalar/configurar
+# absent  -> desinstalar/limpiar
+
+software_state: present
+
+
+# Grupo de claves públicas de Veyon
+#
+# Debe coincidir con el grupo usado
+# por el profesor/master.
+
+veyon_group: "DEFAULT_GROUP"
+
+
+# Fichero de clave pública a desplegar
+#
+# Debe existir en:
+#
+# files/
+
+veyon_public_key_file: "DEFAULT_KEY.pem"
+
+
+# Gestión de lanzadores del menú
+
+veyon_manage_launchers: true
+
+
+# Ocultar lanzadores al alumnado
+
+veyon_hide_launchers: true
+
+
+# Usuarios que SÍ pueden ver lanzadores
+#
+# Reservado para futuras ampliaciones
+
+veyon_launcher_visible_users: []
+
+
+# Categoría menú aplicaciones
+
+veyon_launcher_category: "RemoteAccess;"

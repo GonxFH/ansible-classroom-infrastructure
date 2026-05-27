@@ -1,0 +1,35 @@
+# INSTALACIÓN DE CLAVES DE CONEXIÓN
+
+# Validar variables obligatorias
+
+- name: Validar variables obligatorias
+  assert:
+    that:
+      - veyon_group != "DEFAULT_GROUP"
+      - veyon_public_key_file != "DEFAULT_KEY.pem"
+    fail_msg: "Debes definir las variables veyon_group y veyon_public_key_file"
+
+
+# Asegurar estructura de claves
+
+- name: Crear directorio de clave pública de Veyon
+  file:
+    path: "/etc/veyon/keys/public/{{ veyon_group }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+
+# Copiar clave pública del profesor
+
+- name: Copiar clave pública
+  copy:
+    src: "{{ veyon_public_key_file }}"
+    dest: "/etc/veyon/keys/public/{{ veyon_group }}/key"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reiniciar veyon
+
+

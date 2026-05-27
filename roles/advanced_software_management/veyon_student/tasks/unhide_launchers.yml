@@ -1,0 +1,9 @@
+- name: Eliminar overrides de lanzadores
+  file:
+    path: "/usr/local/share/applications/{{ launcher_file }}"
+    state: absent
+  loop:
+    - veyon-configurator.desktop
+    - x11vnc.desktop
+  loop_control:
+    loop_var: launcher_file

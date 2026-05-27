@@ -1,0 +1,36 @@
+# 
+
+- name: Crear directorio global de aplicaciones override
+  file:
+    path: /usr/local/share/applications
+    state: directory
+    mode: '0755'
+
+#
+
+- name: Copiar lanzadores (Veyon y x11vnc)
+  copy:
+    src: "{{ launcher_file }}"
+    dest: "/usr/local/share/applications/{{ launcher_file | basename }}"
+    remote_src: yes
+    mode: '0644'
+  loop:
+    - /usr/share/applications/veyon-configurator.desktop
+    - /usr/share/applications/x11vnc.desktop
+  loop_control:
+    loop_var: launcher_file
+
+
+
+#
+- name: Ocultar lanzadores globalmente
+  lineinfile:
+    path: "/usr/local/share/applications/{{ launcher_file }}"
+    regexp: '^(NoDisplay|Hidden)='
+    line: 'Hidden=true'
+    create: yes
+  loop:
+    - veyon-configurator.desktop
+    - x11vnc.desktop
+  loop_control:
+    loop_var: launcher_file

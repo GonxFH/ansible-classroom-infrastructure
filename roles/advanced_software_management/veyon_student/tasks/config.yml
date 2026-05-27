@@ -1,0 +1,27 @@
+# CONFIGURAR VEYON PARA FUNCIONAR CON AUTENTICACIÓN POR CLAVE
+
+# Configurar método de autenticación de Veyon por clave
+
+- name: Obtener método autenticación actual
+  command: veyon-cli config get Authentication/Method
+  register: veyon_auth_method
+  changed_when: false
+  failed_when: false
+
+
+- name: Configurar autenticación por clave
+  command: veyon-cli config set Authentication/Method 1
+  when:
+    - veyon_auth_method.rc != 0
+      or veyon_auth_method.stdout != "1"
+  notify: reiniciar veyon
+
+
+    
+# Asegurar servicio Veyon activo
+
+- name: Habilitar servicio Veyon
+  systemd:
+    name: veyon.service
+    enabled: true
+    state: started
