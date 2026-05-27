@@ -1,0 +1,42 @@
+- name: Añadir driver a blacklist
+  lineinfile:
+    path: "{{ wifi_blacklist_file }}"
+    create: true
+    backup: true
+    regexp: "^blacklist {{ item }}$"
+    line: "blacklist {{ item }}"
+    state: present
+  loop: "{{ wifi_driver_final }}"
+  when:
+    - wifi_state == "disabled"
+    - item | trim | length > 0
+  register: blacklist_add_result
+
+
+- name: Eliminar driver de blacklist
+  lineinfile:
+    path: "{{ wifi_blacklist_file }}"
+    regexp: "^blacklist {{ item }}$"
+    state: absent
+  loop: "{{ wifi_driver_final }}"
+  when:
+    - wifi_state == "enabled"
+    - item | trim | length > 0
+  register: blacklist_remove_result
+
+
+- name: Determinar si hubo cambios
+  set_fact:
+    blacklist_changed: >-
+      {{
+        (
+          blacklist_add_result is changed
+        )
+        or
+        (
+          blacklist_remove_result is changed
+        )
+      }}
+
+- debug:
+    var: blacklist_changed

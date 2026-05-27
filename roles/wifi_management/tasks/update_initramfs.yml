@@ -1,0 +1,5 @@
+- name: Actualizar initramfs
+  command: update-initramfs -u
+  when:
+    - wifi_update_initramfs
+    - blacklist_changed

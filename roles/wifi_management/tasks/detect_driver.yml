@@ -1,0 +1,95 @@
+# =========================
+# HABILITAR WIFI
+# =========================
+
+- name: Obtener drivers desde blacklist
+  shell: |
+      grep '^blacklist ' {{ wifi_blacklist_file }} | awk '{print $2}'
+  register: blacklist_drivers
+  failed_when: false
+  changed_when: false
+  when: wifi_state == "enabled"
+
+
+- name: Usar drivers del blacklist
+  set_fact:
+    wifi_driver_final: "{{ blacklist_drivers.stdout_lines }}"
+  when:
+    - wifi_state == "enabled"
+
+
+# =========================
+# DESHABILITAR WIFI
+# =========================
+
+# Si ya existe blacklist, reutilizar
+# para mantener idempotencia
+
+- name: Obtener drivers existentes blacklist
+  shell: |
+      grep '^blacklist ' {{ wifi_blacklist_file }} | awk '{print $2}'
+  register: existing_blacklist
+  failed_when: false
+  changed_when: false
+  when: wifi_state == "disabled"
+
+
+- name: Reutilizar driver existente
+  set_fact:
+    wifi_driver_final: "{{ existing_blacklist.stdout_lines }}"
+  when:
+    - wifi_state == "disabled"
+    - existing_blacklist.stdout_lines | length > 0
+
+
+# Solo detectar si aún no sabemos driver
+
+- name: Detectar driver WiFi automáticamente
+  shell: |
+      lspci -k | awk '
+      /Wireless|Wi-Fi|Network controller/ {f=1}
+      f && /Kernel driver in use:/ {print $NF; exit}
+      '
+  register: wifi_driver_detected_cmd
+  changed_when: false
+  when:
+    - wifi_state=="disabled"
+    - wifi_driver_final is not defined
+    - wifi_driver | length == 0
+
+
+- name: Guardar driver detectado
+  set_fact:
+    wifi_driver_detected: "{{ wifi_driver_detected_cmd.stdout | trim }}"
+  when:
+    - wifi_state=="disabled"
+    - wifi_driver_final is not defined
+    - wifi_driver | length == 0
+
+
+- name: Establecer driver manual/detectado
+  set_fact:
+    wifi_driver_final: >-
+      {{
+        (
+          [wifi_driver]
+          if wifi_driver|length>0
+          else [wifi_driver_detected]
+        )
+        | reject('equalto','')
+        | list
+      }}
+  when:
+    - wifi_state=="disabled"
+    - wifi_driver_final is not defined
+
+
+- name: Verificar drivers encontrados
+  assert:
+    that:
+      - wifi_driver_final | length > 0
+    fail_msg: "No se encontró ningún driver WiFi"
+
+
+- debug:
+    msg: "Driver final: {{ wifi_driver_final }}"

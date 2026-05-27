@@ -1,0 +1,20 @@
+- name: Reiniciar si hubo cambios
+  reboot:
+    msg: "Reinicio tras modificar estado WiFi"
+    reboot_timeout: 600
+
+    # espera unos segundos antes
+    pre_reboot_delay: 5
+
+    # espera tras volver
+    post_reboot_delay: 15
+
+    # tiempo entre intentos
+    connect_timeout: 10
+
+    # prueba para verificar sistema disponible
+    test_command: whoami
+
+  when:
+    - wifi_reboot
+    - blacklist_changed

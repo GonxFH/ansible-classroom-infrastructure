@@ -1,0 +1,13 @@
+# disabled = deshabilita WiFi
+# enabled  = vuelve a habilitarla
+wifi_state: disabled
+
+# Vacío = detección automática
+wifi_driver: ""
+
+wifi_blacklist_file: /etc/modprobe.d/blacklist-wifi.conf
+
+wifi_reboot: true
+
+# Algunos drivers embebidos pueden requerirlo
+wifi_update_initramfs: false

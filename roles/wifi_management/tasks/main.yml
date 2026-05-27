@@ -1,0 +1,13 @@
+- name: Instalar herramientas necesarias
+  apt:
+    name:
+      - pciutils
+    state: present
+
+- import_tasks: detect_driver.yml
+
+- import_tasks: blacklist.yml
+
+- import_tasks: update_initramfs.yml
+
+- import_tasks: reboot.yml

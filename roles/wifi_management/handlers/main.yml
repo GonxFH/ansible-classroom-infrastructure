@@ -1,0 +1,6 @@
+# Reiniciar SSSD
+
+- name: reiniciar sssd
+  systemd:
+    name: sssd.service
+    state: restarted
