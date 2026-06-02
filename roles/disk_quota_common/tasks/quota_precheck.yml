@@ -1,0 +1,37 @@
+- name: Validar contrato del role (API)
+  assert:
+    that:
+      - quota_filesystem is defined
+      - quota_filesystem | length > 0
+    fail_msg: >
+      ERROR: Falta variable obligatoria quota_filesystem.
+      Este role requiere definir el filesystem objetivo (ej: /).
+
+- name: Comprobar comando quotaon
+  command: "which quotaon"
+  register: quotaon_binary
+  changed_when: false
+  failed_when: false
+
+- name: Validar que quota está instalado
+  assert:
+    that:
+      - quotaon_binary.rc == 0
+    fail_msg: >
+      El sistema no tiene instalado quota.
+      Ejecuta primero el role disk_quota.
+
+- name: Comprobar quotas activas
+  command: "quotaon -p {{ quota_filesystem }}"
+  register: quota_status
+  changed_when: false
+  failed_when: false
+
+- name: Validar que las quotas están activas
+  assert:
+    that:
+      - quota_status.stdout is search("user quota")
+      - quota_status.stdout is search("group quota")
+    fail_msg: >
+      Este host no tiene cuotas activas.
+      Ejecuta primero el role disk_quota.
