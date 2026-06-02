@@ -1,0 +1,5 @@
+- import_tasks: enable.yml
+  when: quota_assign_state == "enabled"
+
+- import_tasks: disable.yml
+  when: quota_assign_state == "disabled"

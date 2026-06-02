@@ -1,0 +1,96 @@
+- name: Validación de cuotas
+  import_role:
+    name: disk_quota_common
+
+- name: Eliminar integración PAM
+  lineinfile:
+    path: "{{ quota_pam_file }}"
+    line: "session optional pam_exec.so seteuid {{ quota_script_path }}"
+    state: absent
+
+- name: Eliminar script de cuotas
+  file:
+    path: "{{ quota_script_path }}"
+    state: absent
+
+- name: Eliminar cuota grupo alumnos
+  command: >
+    setquota -g {{ quota_group_name }}
+    0 0 0 0
+    {{ quota_filesystem }}
+  changed_when: true
+
+
+# =========================================================
+# OBTENER SOLO USUARIOS REALES
+# =========================================================
+
+- name: Obtener usuarios del sistema
+  command: getent passwd
+  register: passwd_output
+  changed_when: false
+  when: quota_assign_cleanup_existing_users | bool
+
+
+- name: Extraer solo nombres de usuario
+  set_fact:
+    system_users: >-
+      {{
+        passwd_output.stdout_lines
+        | map('regex_replace', ':.*', '')
+        | list
+      }}
+  when: quota_assign_cleanup_existing_users | bool
+
+
+# =========================================================
+# FILTRAR SOLO USUARIOS DEL GRUPO ALUMNOS
+# =========================================================
+
+- name: Detectar usuarios del grupo alumnos
+  shell: "id -nG {{ item }} | grep -qw {{ quota_group_name }}"
+  loop: "{{ system_users }}"
+  register: quota_group_users
+  changed_when: false
+  failed_when: false
+  when: quota_assign_cleanup_existing_users | bool
+
+
+- name: Construir lista final de alumnos
+  set_fact:
+    quota_users: >-
+      {{
+        quota_group_users.results
+        | selectattr('rc', 'equalto', 0)
+        | map(attribute='item')
+        | list
+      }}
+  when: quota_assign_cleanup_existing_users | bool
+
+
+# =========================================================
+# BORRADO SEGURO DE CUOTAS
+# =========================================================
+
+- name: Eliminar cuotas individuales (SAFE)
+  command: >
+    setquota -u {{ item }}
+    0 0 0 0
+    {{ quota_filesystem }}
+  loop: "{{ quota_users | default([]) }}"
+  loop_control:
+    loop_var: item
+  when:
+    - quota_assign_cleanup_existing_users | bool
+    - quota_users | length > 0
+
+
+# =========================================================
+# DEBUG
+# =========================================================
+
+- name: Mostrar usuarios limpiados
+  debug:
+    var: quota_users
+  when: quota_assign_cleanup_existing_users | bool
+

@@ -1,0 +1,46 @@
+# Estado del role
+#
+# enabled  -> aplicar cuotas automáticas
+# disabled -> eliminar integración PAM
+
+quota_assign_state: enabled
+
+# Eliminar también cuotas individuales existentes
+# cuando quota_assign_state = disabled
+
+quota_assign_cleanup_existing_users: false
+
+
+# Grupo LDAP al que se aplicará cuota compartida
+
+quota_group_name: alumnado
+
+
+# Cuota compartida del grupo
+#
+# Valores en KB.
+
+quota_group_soft: 200G
+quota_group_hard: 210G
+
+
+# Cuota individual por usuario
+
+quota_user_soft: 80G
+quota_user_hard: 90G
+
+# Sistema de archivos donde aplicar cuotas
+
+quota_filesystem: /
+
+
+# Ruta script PAM
+
+quota_script_path: /usr/local/sbin/quota-login.sh
+
+
+# Fichero PAM donde registrar el script
+
+quota_pam_file: /etc/pam.d/common-session
+
+

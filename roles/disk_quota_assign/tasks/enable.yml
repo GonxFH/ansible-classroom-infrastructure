@@ -1,0 +1,32 @@
+- name: Validación de cuotas
+  import_role:
+    name: disk_quota_common
+
+# Asegurar cuota compartida grupo alumnos
+
+- name: Aplicar cuota al grupo alumnos
+  command: >
+    setquota -g {{ quota_group_name }}
+    {{ quota_group_soft }}
+    {{ quota_group_hard }}
+    0 0
+    {{ quota_filesystem }}
+
+
+# Instalar script PAM
+
+- name: Instalar script de cuotas automáticas
+  template:
+    src: quota-login.sh.j2
+    dest: "{{ quota_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+# Registrar script en PAM
+
+- name: Registrar script PAM
+  lineinfile:
+    path: "{{ quota_pam_file }}"
+    line: "session optional pam_exec.so seteuid {{ quota_script_path }}"
+    state: present

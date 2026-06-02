@@ -1,0 +1,37 @@
+#!/bin/bash
+
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+USER_NAME="$PAM_USER"
+
+GROUP_NAME="{{ quota_group_name }}"
+FS="{{ quota_filesystem }}"
+SOFT="{{ quota_user_soft }}"
+HARD="{{ quota_user_hard }}"
+
+FLAG_DIR="/var/lib/quota"
+FLAG="${FLAG_DIR}/${USER_NAME}.done"
+
+if [ "$USER_NAME" = "root" ]; then
+    exit 0
+fi
+
+if ! id -nG "$USER_NAME" 2>/dev/null | grep -qw "$GROUP_NAME"; then
+    exit 0
+fi
+
+mkdir -p "$FLAG_DIR"
+
+if [ -f "$FLAG" ]; then
+    exit 0
+fi
+
+/usr/sbin/setquota -u "$USER_NAME" \
+"$SOFT" \
+"$HARD" \
+0 0 \
+"$FS"
+
+touch "$FLAG"
+
+exit 0

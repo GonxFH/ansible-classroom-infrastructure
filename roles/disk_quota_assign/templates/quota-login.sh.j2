@@ -1,0 +1,50 @@
+#!/bin/bash
+
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+USER_NAME="$PAM_USER"
+
+GROUP_NAME="{{ quota_group_name }}"
+FS="{{ quota_filesystem }}"
+SOFT="{{ quota_user_soft }}"
+HARD="{{ quota_user_hard }}"
+
+# Ignorar root
+if [ "$USER_NAME" = "root" ]; then
+    exit 0
+fi
+
+# Solo usuarios del grupo
+if ! id -nG "$USER_NAME" 2>/dev/null | grep -qw "$GROUP_NAME"; then
+    exit 0
+fi
+
+# Obtener cuota actual desde repquota
+CURRENT=$(repquota -s "$FS" 2>/dev/null | awk -v user="$USER_NAME" '$1==user {print $3, $4}')
+
+CURRENT_SOFT=$(echo "$CURRENT" | awk '{print $1}')
+CURRENT_HARD=$(echo "$CURRENT" | awk '{print $2}')
+
+# Si no hay datos, forzar aplicación
+if [ -z "$CURRENT_SOFT" ] || [ -z "$CURRENT_HARD" ]; then
+    /usr/sbin/setquota -u "$USER_NAME" \
+    "$SOFT" \
+    "$HARD" \
+    0 0 \
+    "$FS"
+    exit 0
+fi
+
+# Comparar (si ya coincide, no hacer nada)
+if [ "$CURRENT_SOFT" = "$SOFT" ] && [ "$CURRENT_HARD" = "$HARD" ]; then
+    exit 0
+fi
+
+# Aplicar nueva cuota si difiere
+/usr/sbin/setquota -u "$USER_NAME" \
+"$SOFT" \
+"$HARD" \
+0 0 \
+"$FS"
+
+exit 0
