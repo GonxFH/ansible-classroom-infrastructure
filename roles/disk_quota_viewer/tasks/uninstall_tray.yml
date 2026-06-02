@@ -1,0 +1,18 @@
+- name: Eliminar script tray
+  file:
+    path: /usr/local/bin/student-quota-viewer-tray.py
+    state: absent
+
+- name: Eliminar autostart tray
+  file:
+    path: /etc/xdg/autostart/student-quota-viewer-tray.desktop
+    state: absent
+
+- name: Eliminar iconos tray
+  file:
+    path: "/usr/share/icons/{{ item }}"
+    state: absent
+  loop:
+    - quota-green.png
+    - quota-yellow.png
+    - quota-red.png

@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+
+import subprocess
+import gi
+
+gi.require_version("Gtk", "3.0")
+gi.require_version("AppIndicator3", "0.1")
+
+from gi.repository import Gtk, AppIndicator3, GLib
+
+ICON_GREEN = "/usr/share/icons/quota-green.png"
+ICON_YELLOW = "/usr/share/icons/quota-yellow.png"
+ICON_RED = "/usr/share/icons/quota-red.png"
+
+last_state = None
+
+
+def run(cmd):
+    return subprocess.getoutput(cmd)
+
+
+def get_percent():
+    out = run("/usr/local/bin/student-quota-viewer --raw")
+    try:
+        return int(out.splitlines()[0].strip())
+    except:
+        return 0
+
+
+def get_text():
+    return run("/usr/local/bin/student-quota-viewer --raw").split("\n", 1)[1]
+
+
+def icon(p):
+    if p < 70:
+        return ICON_GREEN
+    elif p < 90:
+        return ICON_YELLOW
+    return ICON_RED
+
+
+def show(_):
+    subprocess.Popen([
+        "/usr/bin/zenity",
+        "--info",
+        "--title=Mi cuota de disco",
+        "--text=" + get_text()
+    ])
+
+
+def update(ind):
+    global last_state
+
+    p = get_percent()
+
+    ind.set_icon_full(icon(p), "quota")
+    ind.set_label(f"{p}%", "quota")
+
+    if p < 70:
+        state = "OK"
+    elif p < 90:
+        state = "AVISO"
+    else:
+        state = "CRITICO"
+
+    if state != last_state:
+        if state == "AVISO":
+            subprocess.Popen([
+                "notify-send",
+                "⚠️ Aviso de cuota",
+                f"Has superado el 70% ({p}%)"
+            ])
+
+        elif state == "CRITICO":
+            subprocess.Popen([
+                "notify-send",
+                "🚨 Cuota crítica",
+                f"Has superado el 90% ({p}%)"
+            ])
+
+        last_state = state
+
+    return True
+
+
+def main():
+    ind = AppIndicator3.Indicator.new(
+        "quota",
+        ICON_GREEN,
+        AppIndicator3.IndicatorCategory.SYSTEM_SERVICES
+    )
+
+    ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+
+    menu = Gtk.Menu()
+
+    item1 = Gtk.MenuItem(label="Ver cuota")
+    item1.connect("activate", show)
+    menu.append(item1)
+
+    item2 = Gtk.MenuItem(label="Salir")
+    item2.connect("activate", Gtk.main_quit)
+    menu.append(item2)
+
+    menu.show_all()
+    ind.set_menu(menu)
+
+    update(ind)
+    GLib.timeout_add_seconds(60, update, ind)
+
+    Gtk.main()
+
+
+if __name__ == "__main__":
+    main()

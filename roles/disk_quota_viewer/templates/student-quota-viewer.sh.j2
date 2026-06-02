@@ -1,0 +1,136 @@
+#!/bin/bash
+
+QUOTA_BIN="/usr/bin/quota"
+AWK_BIN="/usr/bin/awk"
+GREP_BIN="/usr/bin/grep"
+ZENITY_BIN="/usr/bin/zenity"
+
+USER="$USER"
+MODE="$1"
+
+OUTPUT=$($QUOTA_BIN -s -u "$USER" 2>/dev/null)
+
+# =========================
+# ERRORES
+# =========================
+
+if [ -z "$OUTPUT" ]; then
+    TEXT="No se ha podido obtener información de cuota."
+
+    if [ "$MODE" = "--raw" ]; then
+        echo "PERCENT=0"
+        echo "$TEXT"
+        exit 1
+    fi
+
+    $ZENITY_BIN --error \
+        --title="Mi cuota de disco" \
+        --text="$TEXT"
+    exit 1
+fi
+
+if echo "$OUTPUT" | $GREP_BIN -q "ninguno"; then
+    TEXT="No tienes ninguna cuota asignada."
+
+    if [ "$MODE" = "--raw" ]; then
+        echo "PERCENT=0"
+        echo "$TEXT"
+        exit 0
+    fi
+
+    $ZENITY_BIN --info \
+        --title="Mi cuota de disco" \
+        --text="$TEXT"
+    exit 0
+fi
+
+# =========================
+# DATOS
+# =========================
+
+USED=$(echo "$OUTPUT" | $AWK_BIN '/\/dev/ {print $2}')
+SOFT=$(echo "$OUTPUT" | $AWK_BIN '/\/dev/ {print $3}')
+HARD=$(echo "$OUTPUT" | $AWK_BIN '/\/dev/ {print $4}')
+
+convert_to_kb() {
+    v="$1"
+    echo "$v" | grep -qi "G" && echo "$(echo "$v" | sed 's/[Gg]//') * 1024 * 1024" | bc && return
+    echo "$v" | grep -qi "M" && echo "$(echo "$v" | sed 's/[Mm]//') * 1024" | bc && return
+    echo "$v" | grep -qi "K" && echo "$v" | sed 's/[Kk]//' && return
+    echo "$v"
+}
+
+USED_KB=$(convert_to_kb "$USED")
+SOFT_KB=$(convert_to_kb "$SOFT")
+
+# =========================
+# PORCENTAJE
+# =========================
+
+if [ "$SOFT_KB" -eq 0 ]; then
+    PERCENT=0
+else
+    PERCENT=$(( USED_KB * 100 / SOFT_KB ))
+fi
+
+# =========================
+# SEMÁFORO
+# =========================
+
+if [ "$PERCENT" -lt 70 ]; then
+    STATE="🟢 OK"
+elif [ "$PERCENT" -lt 90 ]; then
+    STATE="🟡 AVISO"
+else
+    STATE="🔴 CRÍTICO"
+fi
+
+# =========================
+# BARRA
+# =========================
+
+BAR=$(awk -v p="$PERCENT" 'BEGIN {
+    w=20;
+    f=int(p*w/100);
+    b="";
+    for(i=0;i<f;i++) b=b"█";
+    for(i=f;i<w;i++) b=b"░";
+    print b;
+}')
+
+# =========================
+# TEXTO UI
+# =========================
+
+TEXT="MI CUOTA DE DISCO
+
+Usuario: $USER
+
+Usado: $USED
+Soft: $SOFT
+Hard: $HARD
+
+Uso: $PERCENT%
+Estado: $STATE
+
+$BAR
+"
+
+# =========================
+# RAW (TRAY)
+# =========================
+
+if [ "$MODE" = "--raw" ]; then
+    echo "$PERCENT"
+    echo "$TEXT"
+    exit 0
+fi
+
+# =========================
+# ZENITY
+# =========================
+
+$ZENITY_BIN --info \
+    --width=500 \
+    --title="Mi cuota de disco" \
+    --text="$TEXT"

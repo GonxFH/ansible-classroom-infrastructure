@@ -1,0 +1,19 @@
+# =========================
+# QUOTA VIEWER
+# =========================
+
+- name: Eliminar script quota viewer
+  file:
+    path: /usr/local/bin/student-quota-viewer
+    state: absent
+
+- name: Eliminar lanzador menú
+  file:
+    path: /usr/share/applications/student-quota-viewer.desktop
+    state: absent
+
+# =========================
+# TRAY
+# =========================
+
+- import_tasks: uninstall_tray.yml

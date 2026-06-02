@@ -1,0 +1,15 @@
+# Estado del role
+#
+# present : instala el visor de cuotas
+# absent  : elimina completamente el visor y el tray 
+
+quota_viewer_state: present
+
+quota_viewer_launcher_name: "Mi cuota de disco"
+
+quota_viewer_category: "System;"
+
+# Zenity siempre activo (NO se controla)
+
+# La instalación del icono en bandeja sí es controlable
+quota_viewer_tray_enabled: false

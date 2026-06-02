@@ -1,0 +1,5 @@
+- import_tasks: install.yml
+  when: quota_viewer_state == "present"
+
+- import_tasks: uninstall.yml
+  when: quota_viewer_state == "absent"

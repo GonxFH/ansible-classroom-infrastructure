@@ -1,0 +1,41 @@
+- name: Validación de cuotas
+  import_role:
+    name: disk_quota_common
+  vars:
+    quota_filesystem: /
+
+- name: Instalar zenity
+  apt:
+    name: zenity
+    state: present
+
+- name: Instalar script
+  template:
+    src: student-quota-viewer.sh.j2
+    dest: /usr/local/bin/student-quota-viewer
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Instalar lanzador
+  template:
+    src: student-quota-viewer.desktop.j2
+    dest: /usr/share/applications/student-quota-viewer.desktop
+    owner: root
+    group: root
+    mode: "0644"
+
+# =========================
+# TRAY (OPCIONAL)
+# =========================
+- name: Instalar tray si está habilitado
+  include_tasks: install_tray.yml
+  when: quota_viewer_tray_enabled | bool
+
+# =========================
+# ELIMINAR TRAY SI SE DESHABILITA
+# =========================
+
+- name: Desinstalar tray si está deshabilitado
+  include_tasks: uninstall_tray.yml
+  when: not quota_viewer_tray_enabled | bool

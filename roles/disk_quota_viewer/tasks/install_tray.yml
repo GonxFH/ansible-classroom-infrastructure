@@ -1,0 +1,35 @@
+- name: Instalar dependencias tray
+  apt:
+    name:
+      - python3-gi
+      - gir1.2-appindicator3-0.1
+      - libnotify-bin
+    state: present
+
+
+- name: Instalar script tray Python
+  template:
+    src: student-quota-viewer-tray.py.j2
+    dest: /usr/local/bin/student-quota-viewer-tray.py
+    mode: "0755"
+
+- name: Autostart tray
+  copy:
+    dest: /etc/xdg/autostart/student-quota-viewer-tray.desktop
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Quota Tray
+      Exec=/usr/local/bin/student-quota-viewer-tray.py
+      OnlyShowIn=LXQt;
+      X-GNOME-Autostart-enabled=true
+    mode: "0644"
+
+- name: Instalar iconos de cuota
+  copy:
+    src: "{{ item }}"
+    dest: "/usr/share/icons/{{ item }}"
+  loop:
+    - quota-green.png
+    - quota-yellow.png
+    - quota-red.png
