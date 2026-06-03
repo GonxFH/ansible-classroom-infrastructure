@@ -1,0 +1,13 @@
+ldap_users_uid_min: 10000
+ldap_home_base: /home
+
+# modo de funcionamiento:
+# all       -> detecta todos los LDAP por UID
+# list      -> lista manual de usuarios
+ldap_home_cleanup_mode: all
+
+# solo usado si mode = list
+ldap_home_cleanup_users: []
+
+# borrado simulado o real
+ldap_home_cleanup_simulate: false

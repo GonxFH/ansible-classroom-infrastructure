@@ -1,0 +1,125 @@
+###############################################################################
+# OBTENER USUARIOS DEL SISTEMA
+###############################################################################
+
+- name: Obtener usuarios del sistema
+  ansible.builtin.command: getent passwd
+  register: passwd_entries
+  changed_when: false
+
+###############################################################################
+# DETERMINAR USUARIOS LDAP (MULTI-MODO)
+###############################################################################
+
+- name: Inicializar lista de usuarios LDAP objetivo
+  ansible.builtin.set_fact:
+    ldap_target_users: []
+
+# MODO ALL (por UID)
+- name: Detectar usuarios LDAP por UID
+  ansible.builtin.set_fact:
+    ldap_target_users: "{{ ldap_target_users + [ fields[0] ] }}"
+  vars:
+    fields: "{{ item.split(':') }}"
+  loop: "{{ passwd_entries.stdout_lines }}"
+  when:
+    - ldap_home_cleanup_mode == 'all'
+    - (fields[2] | int) >= (ldap_users_uid_min | int)
+    - (fields[5] | default('')).startswith(ldap_home_base)
+
+# MODO LIST (manual)
+- name: Usar lista manual de usuarios LDAP
+  ansible.builtin.set_fact:
+    ldap_target_users: "{{ ldap_home_cleanup_users }}"
+  when:
+    - ldap_home_cleanup_mode == 'list'
+
+###############################################################################
+# CONSTRUCCIÓN DE HOMES
+###############################################################################
+
+- name: Construir lista de homes LDAP
+  ansible.builtin.set_fact:
+    ldap_homes: "{{ ldap_target_users | map('regex_replace', '^(.*)$', ldap_home_base + '/\\1') | list }}"
+
+- name: Comprobar homes existentes
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ ldap_homes }}"
+  register: home_stats
+
+- name: Inicializar lista final
+  ansible.builtin.set_fact:
+    ldap_homes_existing: []
+
+- name: Filtrar homes existentes
+  ansible.builtin.set_fact:
+    ldap_homes_existing: "{{ ldap_homes_existing + [ item.stat.path ] }}"
+  loop: "{{ home_stats.results }}"
+  when: item.stat.exists
+
+###############################################################################
+# VALIDACIONES DE SEGURIDAD
+###############################################################################
+
+- name: Validar base segura
+  ansible.builtin.assert:
+    that:
+      - item.startswith(ldap_home_base + '/')
+    fail_msg: "Ruta fuera de base: {{ item }}"
+  loop: "{{ ldap_homes_existing }}"
+
+- name: Evitar borrar base completa
+  ansible.builtin.assert:
+    that:
+      - item != ldap_home_base
+    fail_msg: "Intento de borrar base de homes"
+  loop: "{{ ldap_homes_existing }}"
+
+###############################################################################
+# RESUMEN
+###############################################################################
+
+- name: Resumen de operación
+  ansible.builtin.debug:
+    msg:
+      - "Modo selección usuarios: {{ ldap_home_cleanup_mode }}"
+      - "Simulación activa: {{ ldap_home_cleanup_simulate }}"
+      - "Usuarios detectados: {{ ldap_target_users | length }}"
+      - "Homes existentes: {{ ldap_homes_existing | length }}"
+      - "{{ ldap_homes_existing }}"
+
+###############################################################################
+# SIMULACIÓN (DRY RUN REAL)
+###############################################################################
+
+- name: Simulación de borrado de homes LDAP
+  ansible.builtin.debug:
+    msg: "SIMULACIÓN: se eliminaría {{ item }}"
+  loop: "{{ ldap_homes_existing }}"
+  when: ldap_home_cleanup_simulate | bool
+
+###############################################################################
+# BORRADO REAL
+###############################################################################
+
+- name: Eliminar homes LDAP
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ ldap_homes_existing }}"
+  when: not ldap_home_cleanup_simulate | bool
+
+###############################################################################
+# FINAL
+###############################################################################
+
+- name: Resultado final
+  ansible.builtin.debug:
+    msg: >-
+      {{
+        'SIMULACIÓN completada. No se ha eliminado nada.'
+        if ldap_home_cleanup_simulate | bool
+        else
+        'Borrado completado correctamente.'
+      }}
