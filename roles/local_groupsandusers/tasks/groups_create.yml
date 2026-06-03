@@ -1,0 +1,6 @@
+- name: Crear grupos locales
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    state: present
+  loop: "{{ local_groups }}"
+  when: item.state | default('present') == 'present'

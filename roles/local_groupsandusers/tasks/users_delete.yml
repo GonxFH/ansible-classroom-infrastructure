@@ -1,0 +1,31 @@
+- name: Borrar usuario (solo cuenta)
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: absent
+  loop: "{{ local_users }}"
+  when:
+    - item.state | default('present') == 'absent'
+    - local_users_remove_mode == 'none'
+
+
+- name: Borrar usuario y home
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: absent
+    remove: yes
+  loop: "{{ local_users }}"
+  when:
+    - item.state | default('present') == 'absent'
+    - local_users_remove_mode == 'home'
+
+
+- name: Borrar usuario y TODO
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: absent
+    remove: yes
+    force: yes
+  loop: "{{ local_users }}"
+  when:
+    - item.state | default('present') == 'absent'
+    - local_users_remove_mode == 'all'

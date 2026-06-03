@@ -1,0 +1,20 @@
+local_groups: []
+local_users: []
+
+# qué hacer al borrar usuarios
+# none | home | all
+local_users_remove_mode: home
+
+# límite de seguridad del sistema
+local_system_gid_limit: 999
+
+# grupos nunca borrables
+local_protected_groups:
+  - sudo
+  - plugdev
+  - audio
+  - sambashare
+  - docker
+
+# password por defecto si no se especifica en el usuario
+local_user_password: "Cambio1234!"

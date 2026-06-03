@@ -1,0 +1,22 @@
+- name: Obtener grupos requeridos
+  set_fact:
+    required_groups: "{{ local_users | map(attribute='local_groups') | flatten | unique }}"
+
+- name: Validar que todos los grupos existen
+  ansible.builtin.command: "getent group {{ item }}"
+  loop: "{{ required_groups }}"
+  register: group_check
+  changed_when: false
+  failed_when: group_check.rc != 0
+
+- name: Crear usuarios locales
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ item.local_groups | default([]) | join(',') }}"
+    append: yes
+    state: present
+    create_home: yes
+    password: "{{ item.password | default(local_user_password) | password_hash('sha512') }}"
+  loop: "{{ local_users }}"
+  when: item.state | default('present') == 'present'
+

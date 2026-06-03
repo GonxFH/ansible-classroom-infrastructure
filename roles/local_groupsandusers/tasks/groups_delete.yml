@@ -1,0 +1,8 @@
+- include_tasks: groups_delete_validation.yml
+
+- name: Borrar grupos locales
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    state: absent
+  loop: "{{ local_groups }}"
+  when: item.state | default('present') == 'absent'

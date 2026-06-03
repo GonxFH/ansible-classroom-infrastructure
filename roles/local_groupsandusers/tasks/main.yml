@@ -1,0 +1,18 @@
+- name: Crear grupos locales
+  include_tasks: groups_create.yml
+  when: local_groups | selectattr('state', 'equalto', 'present') | list | length > 0
+
+
+- name: Crear usuarios locales
+  include_tasks: users_create.yml
+  when: local_users | selectattr('state', 'equalto', 'present') | list | length > 0
+
+
+- name: Borrar usuarios locales
+  include_tasks: users_delete.yml
+  when: local_users | selectattr('state', 'equalto', 'absent') | list | length > 0
+
+
+- name: Borrar grupos locales
+  include_tasks: groups_delete.yml
+  when: local_groups | selectattr('state', 'equalto', 'absent') | list | length > 0

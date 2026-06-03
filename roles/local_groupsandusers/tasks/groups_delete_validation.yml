@@ -1,0 +1,32 @@
+- name: Inicializar lista de grupos con GID
+  set_fact:
+    groups_with_gid: []
+
+- name: Obtener información de grupos (si existen)
+  ansible.builtin.command: "getent group {{ item.name }}"
+  loop: "{{ local_groups }}"
+  register: group_info
+  changed_when: false
+  failed_when: false
+
+- name: Construir lista de grupos existentes con GID
+  set_fact:
+    groups_with_gid: "{{ groups_with_gid + [
+      {
+        'name': item.item.name,
+        'gid': (item.stdout.split(':')[2] | int)
+      }
+    ] }}"
+  loop: "{{ group_info.results }}"
+  when: item.rc == 0
+  
+- name: Bloquear grupos del sistema o protegidos
+  ansible.builtin.assert:
+    that:
+      - item.gid > local_system_gid_limit
+      - item.name not in local_protected_groups
+    fail_msg: >
+      ERROR: No se puede eliminar el grupo {{ item.name }}
+      (GID {{ item.gid }})
+      porque está protegido por política del sistema
+  loop: "{{ groups_with_gid }}"
