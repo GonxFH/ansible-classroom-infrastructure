@@ -1,0 +1,15 @@
+- name: Diagnóstico NTP (solo si está habilitado)
+  ansible.builtin.import_tasks: ntp_diagnostics.yml
+  when: system_time_enable_diagnostics | default(false)
+  
+- name: Mostrar información de tiempo (opcional)
+  ansible.builtin.import_tasks: info.yml
+  when: system_time_show_info
+
+- name: Modo NTP
+  ansible.builtin.import_tasks: ntp.yml
+  when: system_time_mode == "ntp"
+
+- name: Modo manual
+  ansible.builtin.import_tasks: manual.yml
+  when: system_time_mode == "manual"

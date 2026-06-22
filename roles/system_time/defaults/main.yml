@@ -1,0 +1,21 @@
+# Modo:
+# - ntp   → sincronización automática
+# - manual → hora fija
+system_time_mode: "ntp"
+
+# Solo para modo manual
+system_time_datetime: "2026-01-01 00:00:00"
+
+# Activar o desactivar NTP explícitamente
+system_time_ntp_enabled: true
+
+# Servidores NTP (opcional)
+system_time_ntp_servers:
+  - "0.pool.ntp.org"
+  - "1.pool.ntp.org"
+
+# Debug/diagnóstico
+system_time_show_info: true
+
+# Activar diagnóstico de red/NTP
+system_time_enable_diagnostics: false

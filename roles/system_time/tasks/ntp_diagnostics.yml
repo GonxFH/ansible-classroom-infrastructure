@@ -1,0 +1,53 @@
+###############################################################################
+# ESTADO BÁSICO DEL SISTEMA
+###############################################################################
+
+- name: Obtener estado de timedatectl
+  ansible.builtin.command: timedatectl show
+  register: timedate_show
+  changed_when: false
+
+- name: Extraer flag de sincronización
+  ansible.builtin.set_fact:
+    ntp_synchronized: "{{ 'SystemClockSynchronized=yes' in timedate_show.stdout }}"
+
+###############################################################################
+# TEST REAL DE CONECTIVIDAD NTP (DIAGNÓSTICO FIREWALL)
+###############################################################################
+
+- name: Probar conectividad a servidor NTP (UDP 123)
+  ansible.builtin.command: >
+    ntpdate -q 0.pool.ntp.org
+  register: ntp_test
+  changed_when: false
+  failed_when: false
+
+###############################################################################
+# INTERPRETACIÓN
+###############################################################################
+
+- name: Detectar posible bloqueo de firewall
+  ansible.builtin.set_fact:
+    ntp_firewall_blocked: >-
+      {{
+        (not ntp_synchronized)
+        and
+        (ntp_test.rc != 0)
+      }}
+
+###############################################################################
+# INFORME FINAL
+###############################################################################
+
+- name: Informe de estado NTP
+  ansible.builtin.debug:
+    msg:
+      - "NTP sincronizado: {{ ntp_synchronized }}"
+      - "Test conectividad NTP: {{ 'OK' if ntp_test.rc == 0 else 'FAIL' }}"
+      - "Posible bloqueo firewall: {{ ntp_firewall_blocked }}"
+      - >-
+        {% if ntp_firewall_blocked %}
+        ⚠ PROBLEMA DETECTADO: posible bloqueo UDP 123 (firewall del centro)
+        {% else %}
+        ✔ Sin problemas aparentes de conectividad NTP
+        {% endif %}

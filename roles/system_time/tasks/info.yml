@@ -1,0 +1,8 @@
+- name: Estado actual del sistema de tiempo
+  ansible.builtin.command: timedatectl
+  register: time_status
+  changed_when: false
+
+- name: Mostrar estado
+  ansible.builtin.debug:
+    var: time_status.stdout_lines

@@ -1,0 +1,17 @@
+- name: Desactivar NTP antes de set-time (OBLIGATORIO)
+  ansible.builtin.command: timedatectl set-ntp false
+  changed_when: false
+
+- name: Establecer fecha y hora manual
+  ansible.builtin.command: >
+    timedatectl set-time "{{ system_time_datetime }}"
+  changed_when: true
+
+- name: Confirmar configuración manual
+  ansible.builtin.command: timedatectl
+  register: final_time
+  changed_when: false
+
+- name: Mostrar resultado final
+  ansible.builtin.debug:
+    var: final_time.stdout_lines

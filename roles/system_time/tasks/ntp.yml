@@ -1,0 +1,13 @@
+- name: Activar o desactivar NTP
+  ansible.builtin.command: >
+    timedatectl set-ntp {{ system_time_ntp_enabled | bool | ternary('true', 'false') }}
+  changed_when: true
+
+- name: Configurar zona horaria (Europa/Madrid por defecto en centro)
+  ansible.builtin.command: timedatectl set-timezone Europe/Madrid
+  changed_when: false
+
+- name: Aviso si NTP está desactivado
+  ansible.builtin.debug:
+    msg: "NTP desactivado: el sistema usará hora manual"
+  when: not system_time_ntp_enabled
