@@ -1,5 +1,5 @@
 firefox_package: firefox
-firefox_state: present
+software_state: present
 
 firefox_keyring_dir: /etc/apt/keyrings
 firefox_keyring_file: packages.mozilla.org.asc

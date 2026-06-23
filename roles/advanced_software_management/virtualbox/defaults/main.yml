@@ -1,5 +1,5 @@
 virtualbox_package: virtualbox
-virtualbox_state: present
+software_state: present
 
 virtualbox_temp_dir: /tmp/virtualbox
 

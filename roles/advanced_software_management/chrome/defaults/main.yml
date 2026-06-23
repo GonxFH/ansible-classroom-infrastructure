@@ -1,5 +1,5 @@
 chrome_package: google-chrome-stable
-chrome_state: present
+software_state: present
 
 chrome_keyring_dir: /etc/apt/keyrings
 chrome_keyring_file: google-chrome.gpg
