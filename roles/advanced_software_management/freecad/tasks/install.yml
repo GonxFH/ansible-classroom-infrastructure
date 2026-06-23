@@ -1,0 +1,88 @@
+###############################################################################
+# VALIDACIONES
+###############################################################################
+
+- name: Validar origen de instalación
+  ansible.builtin.assert:
+    that:
+      - freecad_source in ['url', 'local']
+    fail_msg: >
+      freecad_source debe valer 'url' o 'local'
+
+###############################################################################
+# DIRECTORIOS
+###############################################################################
+
+- name: Crear directorio de instalación
+  ansible.builtin.file:
+    path: "{{ freecad_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+###############################################################################
+# APPIMAGE DESDE INTERNET
+###############################################################################
+
+- name: Descargar AppImage desde Internet
+  ansible.builtin.get_url:
+    url: "{{ freecad_appimage_url }}"
+    dest: "{{ freecad_install_dir }}/{{ freecad_appimage_file }}"
+    owner: root
+    group: root
+    mode: '0755'
+  when:
+    - freecad_source == "url"
+
+###############################################################################
+# APPIMAGE DESDE REPOSITORIO LOCAL
+###############################################################################
+
+- name: Copiar AppImage desde repositorio local
+  ansible.builtin.copy:
+    src: "{{ software_appimage_repository }}/{{ freecad_appimage_local_file }}"
+    dest: "{{ freecad_install_dir }}/{{ freecad_appimage_file }}"
+    owner: root
+    group: root
+    mode: '0755'
+  when:
+    - freecad_source == "local"
+
+###############################################################################
+# ICONO
+###############################################################################
+
+- name: Descargar icono
+  ansible.builtin.get_url:
+    url: "{{ freecad_icon_url }}"
+    dest: "{{ freecad_icon_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+###############################################################################
+# DESKTOP ENTRY
+###############################################################################
+
+- name: Instalar acceso directo
+  ansible.builtin.template:
+    src: freecad.desktop.j2
+    dest: /usr/share/applications/freecad.desktop
+    owner: root
+    group: root
+    mode: '0644'
+
+###############################################################################
+# ACTUALIZAR MENUS
+###############################################################################
+
+- name: Actualizar base de datos de aplicaciones
+  ansible.builtin.command: update-desktop-database
+  changed_when: false
+  failed_when: false
+
+- name: Actualizar caché de iconos
+  ansible.builtin.command: gtk-update-icon-cache /usr/share/icons/hicolor
+  changed_when: false
+  failed_when: false

@@ -1,0 +1,5 @@
+- import_tasks: install.yml
+  when: software_state == "present"
+
+- import_tasks: uninstall.yml
+  when: software_state == "absent"

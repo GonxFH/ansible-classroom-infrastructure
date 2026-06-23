@@ -1,0 +1,40 @@
+###############################################################################
+# DESKTOP ENTRY
+###############################################################################
+
+- name: Eliminar acceso directo
+  ansible.builtin.file:
+    path: /usr/share/applications/freecad.desktop
+    state: absent
+
+###############################################################################
+# ICONO
+###############################################################################
+
+- name: Eliminar icono
+  ansible.builtin.file:
+    path: "{{ freecad_icon_file }}"
+    state: absent
+
+###############################################################################
+# APPIMAGE
+###############################################################################
+
+- name: Eliminar directorio de FreeCAD
+  ansible.builtin.file:
+    path: "{{ freecad_install_dir }}"
+    state: absent
+
+###############################################################################
+# ACTUALIZAR MENUS
+###############################################################################
+
+- name: Actualizar base de datos de aplicaciones
+  ansible.builtin.command: update-desktop-database
+  changed_when: false
+  failed_when: false
+
+- name: Actualizar caché de iconos
+  ansible.builtin.command: gtk-update-icon-cache /usr/share/icons/hicolor
+  changed_when: false
+  failed_when: false
