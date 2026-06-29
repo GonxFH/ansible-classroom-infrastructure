@@ -1,0 +1,12 @@
+- hosts: aulaPrueba
+  become: yes
+
+  roles:
+    - role: disk_quota
+      vars:
+        quota_state: enabled
+        quota_partition: "/"
+        quota_enable_usr: true
+        quota_enable_grp: true
+        quota_run_check: true
+

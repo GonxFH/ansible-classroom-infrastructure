@@ -1,0 +1,11 @@
+- hosts: aulaB34
+  become: true
+
+
+
+  roles:
+    - role: hostname_by_ip
+      vars:
+        hostname_classroom: B34
+
+      

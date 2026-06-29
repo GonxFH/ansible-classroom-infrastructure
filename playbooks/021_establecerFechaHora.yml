@@ -1,0 +1,8 @@
+- hosts: aulaB34
+  become: true
+
+  roles:
+    - role: system_time
+      vars:
+        system_time_mode: "manual"
+        system_time_datetime: "2026-06-22 13:01:00"

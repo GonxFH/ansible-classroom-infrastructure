@@ -1,0 +1,14 @@
+- hosts: aulaPrueba
+  become: yes
+
+  roles:
+    - role: disk_quota_assign
+      vars:
+        quota_assign_state: enabled
+        quota_filesystem: /
+        quota_group_name: alumnado
+        quota_group_soft: 20G
+        quota_group_hard: 21G
+        quota_user_soft: 8G
+        quota_user_hard: 9G
+

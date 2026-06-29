@@ -1,0 +1,7 @@
+- hosts: aulaB30
+  become: true
+
+  roles:
+    - role: wifi_management
+      vars:
+        wifi_state: disabled

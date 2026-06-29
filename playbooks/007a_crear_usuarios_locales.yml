@@ -1,0 +1,32 @@
+- hosts: aulaPrueba
+  become: true
+
+  vars:
+  
+    local_groups:
+      - name: grupo1
+        state: present
+        
+      - name: grupo2
+        state: present
+    
+    local_users:
+      - name: invitado
+        password: invitado
+        local_groups:
+          - plugdev
+          - audio
+          - grupo1
+        state: present
+        
+      - name: examen
+        password: examen
+        local_groups:
+          - plugdev
+          - audio
+          - grupo2
+        state: present
+
+  roles:
+    - role: local_groupsandusers
+      

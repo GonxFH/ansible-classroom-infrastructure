@@ -1,0 +1,20 @@
+- hosts: aulaB34
+  become: true
+
+  tasks:
+
+    - name: Corregir icono de NetBeans
+      ansible.builtin.lineinfile:
+        path: /usr/share/applications/apache-netbeans-ide-30.desktop
+        regexp: '^Icon=apache-netbeans$'
+        line: 'Icon=/usr/share/icons/hicolor/48x48/apps/apache-netbeans.png'
+        backup: true
+
+    - name: Actualizar base de datos de aplicaciones
+      ansible.builtin.command: update-desktop-database
+      changed_when: false
+
+    - name: Actualizar caché de iconos
+      ansible.builtin.command: gtk-update-icon-cache /usr/share/icons/hicolor
+      changed_when: false
+      failed_when: false

@@ -1,0 +1,6 @@
+- hosts: aulaPrueba
+  serial: 10
+  become: true
+
+  roles:
+    - system_update

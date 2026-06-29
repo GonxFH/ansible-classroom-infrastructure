@@ -1,0 +1,25 @@
+- hosts: aulaPrueba
+  become: true
+
+  vars:
+    local_users:
+      - name: invitado
+        state: absent
+        
+      - name: examen
+        state: absent
+       
+    local_users_remove_mode: all
+
+    local_system_gid_limit: 1001
+    
+    local_groups:
+      - name: grupo1
+        state: absent
+        
+      - name: grupo2
+        state: absent
+    
+  roles:
+    - role: local_groupsandusers
+      

@@ -1,0 +1,11 @@
+- hosts: aulaPrueba
+  become: yes
+
+  roles:
+    - role: disk_quota_assign
+      vars:
+        quota_assign_state: disabled
+        quota_filesystem: /
+        quota_group_name: alumnado
+        quota_assign_cleanup_existing_users: true
+

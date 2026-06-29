@@ -1,0 +1,10 @@
+- hosts: aulaPrueba
+  become: true
+
+  vars:
+    ldap_home_cleanup_mode: all
+    ldap_home_cleanup_simulate: false
+
+  roles:
+    - role: ldap_users_home_cleanup
+      

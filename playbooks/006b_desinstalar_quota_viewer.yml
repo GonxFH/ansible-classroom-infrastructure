@@ -1,0 +1,8 @@
+- hosts: aulaPrueba
+  become: yes
+
+  roles:
+    - role: disk_quota_viewer
+      vars:
+        quota_viewer_state: absent
+

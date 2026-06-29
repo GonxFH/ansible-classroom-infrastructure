@@ -1,0 +1,8 @@
+- hosts: aulaB34
+  become: true
+
+  roles:
+    - role: software_install
+      vars:
+        software_profiles:
+          - B34_Programacion

@@ -1,0 +1,11 @@
+- hosts: aulaPrueba
+  become: yes
+
+  roles:
+    - role: disk_quota_viewer
+      vars:
+        quota_viewer_state: present
+        quota_viewer_launcher_name: "Mi cuota de disco"
+        quota_viewer_category: "System;"
+        quota_viewer_tray_enabled: true
+

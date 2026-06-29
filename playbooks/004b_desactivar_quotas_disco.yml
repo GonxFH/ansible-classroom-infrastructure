@@ -1,0 +1,7 @@
+- hosts: aulaPrueba
+  become: yes
+
+  roles:
+    - role: disk_quota
+      vars:
+        quota_state: disabled

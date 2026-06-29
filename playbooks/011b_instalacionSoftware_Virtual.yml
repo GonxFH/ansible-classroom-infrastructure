@@ -1,0 +1,8 @@
+- hosts: aulaPrueba
+  become: true
+
+  roles:
+    - role: software_install
+      vars:
+        software_profiles:
+          - B9_Tecnologia

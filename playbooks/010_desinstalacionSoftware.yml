@@ -1,0 +1,5 @@
+- hosts: aulaPrueba
+  become: true
+
+  roles:
+    - role: software_uninstall
